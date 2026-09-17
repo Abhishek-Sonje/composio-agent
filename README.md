@@ -38,11 +38,11 @@ The loop counts attempted external research actions rather than wall-clock time.
 
 - **Node.js 24 LTS** is the supported runtime for this project.
 - **`@google/genai`** is Google's current GA JavaScript/TypeScript SDK.
-- **`gemini-2.5-flash`** is the default model because it is stable, available on the free tier, and supports the structured generation needed here.
+- **`gemini-3.6-flash`** is the default model because the Gemini API currently directs new users away from the retired 2.5 Flash model to this stable replacement.
 - **Composio sessions** expose only `COMPOSIO_SEARCH_WEB` and `COMPOSIO_SEARCH_FETCH_URL_CONTENT` from the no-auth `composio_search` toolkit. This gives Composio a useful, narrow responsibility rather than adding it ceremonially.
 - **Zod** provides runtime validation for configuration, research actions, targets, and final results.
 
-Gemini 3.8 Flash was not selected for the initial free-tier configuration because current pricing documentation lists Google Search grounding as unavailable on its free tier. Research instead uses Composio Search, while Gemini handles planning and synthesis. The model remains configurable through `GEMINI_MODEL`.
+Gemini 2.5 Flash initially appeared suitable in the public pricing documentation, but a live API check reported that it is no longer available to new users and directed them to Gemini 3.6 Flash. Research uses Composio Search rather than Gemini Search grounding, while Gemini handles planning and synthesis. The model remains configurable through `GEMINI_MODEL`.
 
 Relevant current documentation:
 
@@ -71,7 +71,7 @@ Fill in `.env`:
 
 ```dotenv
 GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.6-flash
 COMPOSIO_API_KEY=
 MAX_RESEARCH_STEPS=10
 ```
@@ -109,4 +109,3 @@ Tests cover environment errors, target and result validation, prompt constructio
 - A malformed or schema-invalid final model response fails clearly; bounded repair is not yet implemented.
 - Search result and fetched-page payload sizes are not yet compacted. Real runs will show whether this needs improvement.
 - The CLI currently accepts a name only. Website and expected-category context are supported by the internal target schema but are not exposed as flags yet.
-

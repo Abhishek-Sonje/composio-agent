@@ -4,7 +4,7 @@ import { readConfig } from "./env.js";
 
 const validEnv = {
   GEMINI_API_KEY: "gemini-key",
-  GEMINI_MODEL: "gemini-2.5-flash",
+  GEMINI_MODEL: "gemini-3.6-flash",
   COMPOSIO_API_KEY: "composio-key",
 };
 
@@ -12,7 +12,7 @@ describe("readConfig", () => {
   it("returns normalized configuration with the default research budget", () => {
     expect(readConfig(validEnv)).toEqual({
       geminiApiKey: "gemini-key",
-      geminiModel: "gemini-2.5-flash",
+      geminiModel: "gemini-3.6-flash",
       composioApiKey: "composio-key",
       maxResearchSteps: 10,
     });
@@ -36,4 +36,3 @@ describe("readConfig", () => {
     ).toThrowError(/MAX_RESEARCH_STEPS/);
   });
 });
-
