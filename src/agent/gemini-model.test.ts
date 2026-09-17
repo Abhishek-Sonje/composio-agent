@@ -49,6 +49,69 @@ describe("createGeminiResearchModel", () => {
       }),
     ).rejects.toThrow();
   });
+
+  it("uses the required field ledger as the authoritative evidence mapping", async () => {
+    const evidenceUrl = "https://example.com/rest";
+    const generate = vi.fn().mockResolvedValue(
+      JSON.stringify({
+        result: {
+          app: "Example",
+          category: "Productivity",
+          description: "Example is a productivity application.",
+          authMethods: ["OAuth 2.0"],
+          accessModel: "unknown",
+          apiSurface: {
+            rest: true,
+            graphql: null,
+            other: [],
+            summary: "A REST API is available.",
+          },
+          mcp: { status: "unknown" },
+          buildability: "unknown",
+          blocker: null,
+          confidence: "medium",
+          unknownFields: ["accessModel", "apiSurface.graphql", "mcp", "buildability"],
+          evidence: [
+            {
+              title: "REST documentation",
+              url: evidenceUrl,
+              sourceType: "official",
+              supports: ["authMethods"],
+            },
+          ],
+          researchNotes: [],
+        },
+        fieldEvidence: {
+          app: [],
+          category: [],
+          description: [],
+          authMethods: [],
+          accessModel: [],
+          apiSurfaceRest: [evidenceUrl],
+          apiSurfaceGraphql: [],
+          apiSurfaceOther: [],
+          mcp: [],
+          buildability: [],
+          blocker: [],
+        },
+      }),
+    );
+    const model = createGeminiResearchModel(gemini, generate);
+
+    const output = await model.createResult({
+      target: { name: "Example" },
+      observations: [],
+      stepsUsed: 0,
+      maxSteps: 1,
+      stoppedBecause: "complete",
+    });
+
+    expect(output).toEqual(
+      expect.objectContaining({
+        evidence: [expect.objectContaining({ supports: ["apiSurface.rest"] })],
+      }),
+    );
+  });
 });
 
 describe("withTransientModelRetry", () => {

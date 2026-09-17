@@ -38,5 +38,6 @@ Research this single application. Begin with official sources and work through m
 
 export const FINAL_RESULT_INSTRUCTION = `Produce the final structured research result using only the gathered evidence.
 
-For each evidence item, list the exact result fields it supports. Use sourceType "official" only for pages controlled by the application vendor or its official developer organization. Use null, "unknown", an empty list, and unknownFields as appropriate when the evidence does not resolve a field. A search that finds no result does not prove that an API or MCP server does not exist. Do not add facts from memory.`;
+For each evidence item, list the exact result fields it supports. Then complete fieldEvidence as a required field-by-field ledger. Each ledger array must contain only URLs from the evidence list that directly support that exact field. Use an empty array when no gathered source supports the field. REST evidence belongs in apiSurfaceRest and GraphQL evidence belongs in apiSurfaceGraphql; evidence for one does not support the other.
 
+Use sourceType "official" only for pages controlled by the application vendor or its official developer organization. Use null, "unknown", an empty list, and unknownFields as appropriate when the evidence does not resolve a field. A search that finds no result does not prove that an API or MCP server does not exist. Do not add facts from memory.`;

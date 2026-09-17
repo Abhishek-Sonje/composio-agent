@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import type { GeminiClient } from "./gemini.js";
 import {
+  applyFieldEvidence,
+  researchSynthesisSchema,
+} from "./evidence-mapping.js";
+import {
   FINAL_RESULT_INSTRUCTION,
   RESEARCH_SYSTEM_INSTRUCTION,
   buildResearchPrompt,
@@ -143,10 +147,11 @@ ${JSON.stringify(context, null, 2)}`;
       const text = await generate({
         model: gemini.model,
         prompt,
-        schema: z.toJSONSchema(appResearchResultSchema),
+        schema: z.toJSONSchema(researchSynthesisSchema),
       });
 
-      return appResearchResultSchema.parse(JSON.parse(text));
+      const synthesis = researchSynthesisSchema.parse(JSON.parse(text));
+      return applyFieldEvidence(synthesis.result, synthesis.fieldEvidence);
     },
   };
 }
