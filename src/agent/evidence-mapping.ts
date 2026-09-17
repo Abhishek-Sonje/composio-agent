@@ -85,6 +85,13 @@ export function applyFieldEvidence(
 
     const text = `${item.title}\n${item.url}\n${content}`;
     const supports = supportsByUrl.get(normalized) ?? new Set<ResearchField>();
+    if (
+      result.authMethods.some((method) =>
+        text.toLocaleLowerCase().includes(method.toLocaleLowerCase()),
+      )
+    ) {
+      supports.add("authMethods");
+    }
     if (result.apiSurface.rest === true && /\bREST(?:ful)?\s+API\b/i.test(text)) {
       supports.add("apiSurface.rest");
     }
