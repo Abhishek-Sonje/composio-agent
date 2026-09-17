@@ -11,6 +11,7 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
+    "research": "npm run build --silent && node --env-file-if-exists=.env dist/index.js",
     "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
