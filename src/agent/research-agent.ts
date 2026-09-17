@@ -281,17 +281,22 @@ export async function researchApp(
       log(
         `[${target.name}] More evidence required before completion: ${requiredAction}`,
       );
-      action = researchActionSchema.parse(
-        await model.chooseAction({
-          target,
-          observations,
-          stepsUsed: observations.length,
-          maxSteps,
-          requiredAction,
-        }),
-      );
+      for (let attempt = 1; attempt <= 3; attempt += 1) {
+        action = researchActionSchema.parse(
+          await model.chooseAction({
+            target,
+            observations,
+            stepsUsed: observations.length,
+            maxSteps,
+            requiredAction,
+          }),
+        );
+        if (action.action === requiredAction) break;
+      }
       if (action.action !== requiredAction) {
-        throw new Error(`Research model must perform ${requiredAction} before finishing`);
+        throw new Error(
+          `Research model did not perform required ${requiredAction} action after 3 attempts`,
+        );
       }
     }
 
