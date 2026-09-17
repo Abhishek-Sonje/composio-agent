@@ -99,8 +99,16 @@ describe("createGeminiResearchModel", () => {
 
     const output = await model.createResult({
       target: { name: "Example" },
-      observations: [],
-      stepsUsed: 0,
+      observations: [
+        {
+          step: 1,
+          action: "fetch_url",
+          purpose: "Inspect REST documentation",
+          input: evidenceUrl,
+          output: { content: "REST API documentation" },
+        },
+      ],
+      stepsUsed: 1,
       maxSteps: 1,
       stoppedBecause: "complete",
     });

@@ -108,10 +108,13 @@ Current research state:
 ${contextJson(context)}
 
 Choose exactly one next action. Search for a specific unresolved question, fetch a promising source URL for inspection, or finish only when the important fields have sufficient evidence.`;
+      const actionRequirement = context.requiredAction
+        ? `\nYou must choose action "${context.requiredAction}" in this turn. Do not finish.`
+        : "";
 
       const text = await generate({
         model: gemini.model,
-        prompt,
+        prompt: `${prompt}${actionRequirement}`,
         schema: z.toJSONSchema(providerActionSchema),
       });
 
@@ -165,7 +168,13 @@ ${JSON.stringify(context.observations, null, 2)}`,
       });
       const fieldEvidence = fieldEvidenceSchema.parse(JSON.parse(mappingText));
 
-      return applyFieldEvidence(result, fieldEvidence);
+      const fetchedUrls = context.observations
+        .filter(
+          (observation) =>
+            observation.action === "fetch_url" && observation.error === undefined,
+        )
+        .map((observation) => observation.input);
+      return applyFieldEvidence(result, fieldEvidence, fetchedUrls);
     },
   };
 }

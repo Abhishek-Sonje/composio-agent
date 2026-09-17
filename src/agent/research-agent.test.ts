@@ -100,18 +100,18 @@ describe("researchApp", () => {
 
   it("records tool errors and continues researching", async () => {
     const model: ResearchModel = {
-      chooseAction: vi
-        .fn()
-        .mockResolvedValueOnce({
-          action: "search",
-          query: "official docs",
-          purpose: "Find documentation",
-        })
-        .mockResolvedValueOnce({ action: "finish", reason: "No more actions" }),
+      chooseAction: vi.fn().mockResolvedValue({
+        action: "search",
+        query: "official docs",
+        purpose: "Find documentation",
+      }),
       createResult: vi.fn().mockResolvedValue(result),
     };
     const tools = {
-      search: vi.fn().mockRejectedValue(new Error("network timeout")),
+      search: vi
+        .fn()
+        .mockRejectedValueOnce(new Error("network timeout"))
+        .mockResolvedValue({ results: [] }),
       fetchUrl: vi.fn(),
     };
 
@@ -122,17 +122,28 @@ describe("researchApp", () => {
 
     expect(model.createResult).toHaveBeenCalledWith(
       expect.objectContaining({
-        observations: [expect.objectContaining({ error: "network timeout" })],
+        observations: expect.arrayContaining([
+          expect.objectContaining({ error: "network timeout" }),
+        ]),
       }),
     );
   });
 
   it("rejects a malformed final result", async () => {
     const model: ResearchModel = {
-      chooseAction: vi.fn().mockResolvedValue({
-        action: "finish",
-        reason: "Done",
-      }),
+      chooseAction: vi
+        .fn()
+        .mockResolvedValueOnce({
+          action: "search",
+          query: "official docs",
+          purpose: "Find documentation",
+        })
+        .mockResolvedValueOnce({
+          action: "fetch_url",
+          url: "https://example.com/docs",
+          purpose: "Inspect documentation",
+        })
+        .mockResolvedValue({ action: "finish", reason: "Done" }),
       createResult: vi.fn().mockResolvedValue({ app: "Example" }),
     };
 
@@ -141,7 +152,10 @@ describe("researchApp", () => {
         { name: "Example" },
         {
           model,
-          tools: { search: vi.fn(), fetchUrl: vi.fn() },
+          tools: {
+            search: vi.fn().mockResolvedValue({ results: [] }),
+            fetchUrl: vi.fn().mockResolvedValue({ content: "docs" }),
+          },
           maxSteps: 3,
           log: vi.fn(),
         },

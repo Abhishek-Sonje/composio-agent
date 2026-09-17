@@ -51,8 +51,10 @@ function normalizeUrl(value: string): string {
 export function applyFieldEvidence(
   result: AppResearchResult,
   fieldEvidence: FieldEvidence,
+  fetchedUrls: string[],
 ): AppResearchResult {
   const supportsByUrl = new Map<string, Set<ResearchField>>();
+  const fetched = new Set(fetchedUrls.map(normalizeUrl));
 
   for (const [ledgerField, urls] of Object.entries(fieldEvidence) as Array<
     [keyof FieldEvidence, string[]]
@@ -60,6 +62,7 @@ export function applyFieldEvidence(
     const resultField = fieldEvidenceMapping[ledgerField];
     for (const url of urls) {
       const normalized = normalizeUrl(url);
+      if (!fetched.has(normalized)) continue;
       const supports = supportsByUrl.get(normalized) ?? new Set<ResearchField>();
       supports.add(resultField);
       supportsByUrl.set(normalized, supports);
@@ -73,4 +76,3 @@ export function applyFieldEvidence(
 
   return appResearchResultSchema.parse({ ...result, evidence });
 }
-

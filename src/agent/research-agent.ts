@@ -44,7 +44,11 @@ export type ResearchContext = {
 };
 
 export type ResearchModel = {
-  chooseAction(context: Omit<ResearchContext, "stoppedBecause">): Promise<ResearchAction>;
+  chooseAction(
+    context: Omit<ResearchContext, "stoppedBecause"> & {
+      requiredAction?: "search" | "fetch_url";
+    },
+  ): Promise<ResearchAction>;
   createResult(context: ResearchContext): Promise<unknown>;
 };
 
@@ -242,7 +246,7 @@ export async function researchApp(
   log(`[${target.name}] Research started`);
 
   for (let step = 1; step <= maxSteps; step += 1) {
-    const action = researchActionSchema.parse(
+    let action = researchActionSchema.parse(
       await model.chooseAction({
         target,
         observations,
@@ -252,9 +256,35 @@ export async function researchApp(
     );
 
     if (action.action === "finish") {
-      stoppedBecause = "complete";
-      log(`[${target.name}] Research complete: ${action.reason}`);
-      break;
+      const hasSearch = observations.some(
+        (observation) => observation.action === "search" && !observation.error,
+      );
+      const hasFetch = observations.some(
+        (observation) => observation.action === "fetch_url" && !observation.error,
+      );
+
+      if (hasSearch && hasFetch) {
+        stoppedBecause = "complete";
+        log(`[${target.name}] Research complete: ${action.reason}`);
+        break;
+      }
+
+      const requiredAction = hasSearch ? "fetch_url" : "search";
+      log(
+        `[${target.name}] More evidence required before completion: ${requiredAction}`,
+      );
+      action = researchActionSchema.parse(
+        await model.chooseAction({
+          target,
+          observations,
+          stepsUsed: observations.length,
+          maxSteps,
+          requiredAction,
+        }),
+      );
+      if (action.action !== requiredAction) {
+        throw new Error(`Research model must perform ${requiredAction} before finishing`);
+      }
     }
 
     log(

@@ -62,7 +62,11 @@ function ledger(overrides: Partial<FieldEvidence> = {}): FieldEvidence {
 
 describe("applyFieldEvidence", () => {
   it("preserves a supported field mapping that the evidence item omitted", () => {
-    const mapped = applyFieldEvidence(result, ledger({ apiSurfaceRest: [restUrl] }));
+    const mapped = applyFieldEvidence(
+      result,
+      ledger({ apiSurfaceRest: [restUrl] }),
+      [restUrl],
+    );
 
     expect(mapped.evidence).toEqual([
       expect.objectContaining({ supports: ["apiSurface.rest"] }),
@@ -70,7 +74,7 @@ describe("applyFieldEvidence", () => {
   });
 
   it("does not preserve model-generated supports without ledger evidence", () => {
-    const mapped = applyFieldEvidence(result, ledger());
+    const mapped = applyFieldEvidence(result, ledger(), [restUrl, graphqlUrl]);
 
     expect(mapped.evidence).toEqual([]);
   });
@@ -82,6 +86,7 @@ describe("applyFieldEvidence", () => {
         apiSurfaceRest: [restUrl],
         apiSurfaceGraphql: [graphqlUrl],
       }),
+      [restUrl, graphqlUrl],
     );
 
     expect(mapped.evidence[0]?.supports).toEqual(["apiSurface.rest"]);
@@ -92,6 +97,7 @@ describe("applyFieldEvidence", () => {
     const mapped = applyFieldEvidence(
       result,
       ledger({ authMethods: [restUrl] }),
+      [restUrl],
     );
 
     expect(mapped.evidence[0]?.supports).toEqual(["authMethods"]);
@@ -104,9 +110,19 @@ describe("applyFieldEvidence", () => {
     const mapped = applyFieldEvidence(
       result,
       ledger({ apiSurfaceRest: ["https://unseen.example.com/rest"] }),
+      [restUrl],
+    );
+
+    expect(mapped.evidence).toEqual([]);
+  });
+
+  it("does not accept a search-only URL that was never fetched", () => {
+    const mapped = applyFieldEvidence(
+      result,
+      ledger({ apiSurfaceRest: [restUrl] }),
+      [],
     );
 
     expect(mapped.evidence).toEqual([]);
   });
 });
-

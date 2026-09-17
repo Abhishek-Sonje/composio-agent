@@ -33,7 +33,7 @@ export function buildResearchPrompt(target: ResearchTarget): string {
 
   return `${context}
 
-Research this single application. Begin with official sources and work through missing fields methodically. Each tool call must answer a specific unresolved question. Keep source URLs and the claims they support for the final structured result.`;
+Research this single application. Begin with official sources and work through missing fields methodically. Each tool call must answer a specific unresolved question. Search results are discovery hints only: fetch the underlying source pages that support important fields before finishing. Keep source URLs and the claims they support for the final structured result.`;
 }
 
 export const FINAL_RESULT_INSTRUCTION = `Produce the final structured research result using only the gathered evidence.
