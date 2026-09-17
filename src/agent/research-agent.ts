@@ -317,9 +317,17 @@ export async function researchApp(
         if (action.action === requiredAction) break;
       }
       if (action.action !== requiredAction) {
+        if (requiredAction === "search") {
+          action = {
+            action: "search",
+            query: `${target.name} official ${missingEvidence.join(" ")} documentation`,
+            purpose: `Find official evidence for ${missingEvidence.join(", ")}`,
+          };
+        } else {
         throw new Error(
           `Research model did not perform required ${requiredAction} action after 3 attempts`,
         );
+        }
       }
     }
 
