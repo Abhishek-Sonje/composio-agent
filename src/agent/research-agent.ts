@@ -135,6 +135,78 @@ export function applyConfidencePolicy(
   return { ...result, confidence, researchNotes: notes };
 }
 
+export function removeUnsupportedClaims(
+  result: AppResearchResult,
+): AppResearchResult {
+  const supported = new Set(result.evidence.flatMap((item) => item.supports));
+  const unknownFields = new Set(result.unknownFields);
+  const researchNotes = [...result.researchNotes];
+  let changed = false;
+
+  function markUnknown(field: Parameters<typeof supported.has>[0]): void {
+    unknownFields.add(field);
+    changed = true;
+  }
+
+  const authMethods = supported.has("authMethods") ? result.authMethods : [];
+  if (result.authMethods.length > 0 && authMethods.length === 0) markUnknown("authMethods");
+
+  const accessModel = supported.has("accessModel") ? result.accessModel : "unknown";
+  if (result.accessModel !== "unknown" && accessModel === "unknown") markUnknown("accessModel");
+
+  const rest = supported.has("apiSurface.rest") ? result.apiSurface.rest : null;
+  if (result.apiSurface.rest !== null && rest === null) markUnknown("apiSurface.rest");
+  const graphql = supported.has("apiSurface.graphql")
+    ? result.apiSurface.graphql
+    : null;
+  if (result.apiSurface.graphql !== null && graphql === null) {
+    markUnknown("apiSurface.graphql");
+  }
+  const other = supported.has("apiSurface.other") ? result.apiSurface.other : [];
+  if (result.apiSurface.other.length > 0 && other.length === 0) {
+    markUnknown("apiSurface.other");
+  }
+
+  const mcp = supported.has("mcp")
+    ? result.mcp
+    : { status: "unknown" as const, notes: "No cited evidence supports MCP status." };
+  if (result.mcp.status !== "unknown" && mcp.status === "unknown") markUnknown("mcp");
+
+  let buildability = supported.has("buildability")
+    ? result.buildability
+    : "unknown";
+  if (result.buildability !== "unknown" && buildability === "unknown") {
+    markUnknown("buildability");
+  }
+  const blocker = supported.has("blocker") || result.blocker === null ? result.blocker : null;
+  if (result.blocker !== null && blocker === null) {
+    markUnknown("blocker");
+    if (["blocked", "partially_buildable"].includes(buildability)) {
+      buildability = "unknown";
+      markUnknown("buildability");
+    }
+  }
+
+  if (changed) {
+    researchNotes.push(
+      "Unsupported claims were converted to unknown because no evidence item cited the affected fields.",
+    );
+  }
+
+  return {
+    ...result,
+    authMethods,
+    accessModel,
+    apiSurface: { ...result.apiSurface, rest, graphql, other },
+    mcp,
+    buildability,
+    blocker: buildability === "buildable" ? null : blocker,
+    confidence: changed && result.confidence === "high" ? "medium" : result.confidence,
+    unknownFields: [...unknownFields],
+    researchNotes,
+  };
+}
+
 export async function researchApp(
   target: ResearchTarget,
   dependencies: ResearchAgentDependencies,
@@ -214,7 +286,9 @@ export async function researchApp(
       ...context,
     }),
   );
-  const normalizedResult = applyConfidencePolicy(result, context);
+  const normalizedResult = appResearchResultSchema.parse(
+    applyConfidencePolicy(removeUnsupportedClaims(result), context),
+  );
 
   log(`[${target.name}] Confidence: ${normalizedResult.confidence}`);
   return normalizedResult;

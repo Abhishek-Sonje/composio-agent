@@ -4,6 +4,7 @@ import type { AppResearchResult } from "./result-schema.js";
 import {
   applyConfidencePolicy,
   compactToolOutput,
+  removeUnsupportedClaims,
   researchApp,
   type ResearchModel,
 } from "./research-agent.js";
@@ -183,6 +184,56 @@ describe("applyConfidencePolicy", () => {
     expect(
       applyConfidencePolicy({ ...result, confidence: "high" }, context).confidence,
     ).toBe("low");
+  });
+});
+
+describe("removeUnsupportedClaims", () => {
+  it("converts API claims without cited support to unknown", () => {
+    const normalized = removeUnsupportedClaims({
+      ...result,
+      apiSurface: {
+        rest: true,
+        graphql: true,
+        other: ["SOAP"],
+        summary: "Several APIs are available.",
+      },
+      confidence: "high",
+      evidence: [
+        {
+          title: "REST docs",
+          url: "https://example.com/rest",
+          sourceType: "official",
+          supports: ["apiSurface.rest"],
+        },
+      ],
+    });
+
+    expect(normalized.apiSurface).toMatchObject({
+      rest: true,
+      graphql: null,
+      other: [],
+    });
+    expect(normalized.unknownFields).toEqual(
+      expect.arrayContaining(["apiSurface.graphql", "apiSurface.other"]),
+    );
+    expect(normalized.confidence).toBe("medium");
+  });
+
+  it("retains claims with explicit evidence support", () => {
+    const normalized = removeUnsupportedClaims({
+      ...result,
+      authMethods: ["OAuth 2.0"],
+      evidence: [
+        {
+          title: "Auth docs",
+          url: "https://example.com/auth",
+          sourceType: "official",
+          supports: ["authMethods"],
+        },
+      ],
+    });
+
+    expect(normalized.authMethods).toEqual(["OAuth 2.0"]);
   });
 });
 
