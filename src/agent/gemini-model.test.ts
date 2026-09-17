@@ -6,7 +6,7 @@ import {
 } from "./gemini-model.js";
 import type { GeminiClient } from "./gemini.js";
 
-const gemini = { model: "gemini-3.6-flash" } as GeminiClient;
+const gemini = { model: "gemini-3.5-flash" } as GeminiClient;
 
 describe("createGeminiResearchModel", () => {
   it("parses a structured next action", async () => {
@@ -30,7 +30,7 @@ describe("createGeminiResearchModel", () => {
       }),
     ).resolves.toMatchObject({ action: "search" });
     expect(generate).toHaveBeenCalledWith(
-      expect.objectContaining({ model: "gemini-3.6-flash" }),
+      expect.objectContaining({ model: "gemini-3.5-flash" }),
     );
   });
 

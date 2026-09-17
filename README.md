@@ -38,11 +38,11 @@ The loop counts attempted external research actions rather than wall-clock time.
 
 - **Node.js 24 LTS** is the supported runtime for this project.
 - **`@google/genai`** is Google's current GA JavaScript/TypeScript SDK.
-- **`gemini-3.6-flash`** is the default model because the Gemini API currently directs new users away from the retired 2.5 Flash model to this stable replacement.
+- **`gemini-3.5-flash`** is the default model because it is stable, supports the required structured output, and was available during live verification when the project's model-specific 3.6 Flash quota was exhausted.
 - **Composio sessions** expose only `COMPOSIO_SEARCH_WEB` and `COMPOSIO_SEARCH_FETCH_URL_CONTENT` from the no-auth `composio_search` toolkit. This gives Composio a useful, narrow responsibility rather than adding it ceremonially.
 - **Zod** provides runtime validation for configuration, research actions, targets, and final results.
 
-Gemini 2.5 Flash initially appeared suitable in the public pricing documentation, but a live API check reported that it is no longer available to new users and directed them to Gemini 3.6 Flash. Research uses Composio Search rather than Gemini Search grounding, while Gemini handles planning and synthesis. The model remains configurable through `GEMINI_MODEL`.
+Gemini 2.5 Flash initially appeared suitable in the public pricing documentation, but a live API check reported that it is no longer available to new users. Gemini 3.6 Flash was then blocked by the test project's model-specific free-tier quota, while stable Gemini 3.5 Flash passed a live structured-output run. Research uses Composio Search rather than Gemini Search grounding, while Gemini handles planning and synthesis. The model remains configurable through `GEMINI_MODEL`.
 
 Relevant current documentation:
 
@@ -71,7 +71,7 @@ Fill in `.env`:
 
 ```dotenv
 GEMINI_API_KEY=
-GEMINI_MODEL=gemini-3.6-flash
+GEMINI_MODEL=gemini-3.5-flash
 COMPOSIO_API_KEY=
 MAX_RESEARCH_STEPS=10
 ```
