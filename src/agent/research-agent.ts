@@ -140,7 +140,7 @@ export function removeUnsupportedClaims(
 ): AppResearchResult {
   const supported = new Set(result.evidence.flatMap((item) => item.supports));
   const unknownFields = new Set(result.unknownFields);
-  const researchNotes = [...result.researchNotes];
+  let researchNotes = [...result.researchNotes];
   let changed = false;
 
   function markUnknown(field: Parameters<typeof supported.has>[0]): void {
@@ -166,6 +166,20 @@ export function removeUnsupportedClaims(
   if (result.apiSurface.other.length > 0 && other.length === 0) {
     markUnknown("apiSurface.other");
   }
+  const apiClaimsRemoved =
+    rest !== result.apiSurface.rest ||
+    graphql !== result.apiSurface.graphql ||
+    other.length !== result.apiSurface.other.length;
+  const supportedApiTypes = [
+    rest === true ? "REST" : null,
+    graphql === true ? "GraphQL" : null,
+    ...other,
+  ].filter((value): value is string => value !== null);
+  const apiSummary = apiClaimsRemoved
+    ? supportedApiTypes.length > 0
+      ? `Cited evidence supports ${supportedApiTypes.join(", ")}; other API surface details remain unresolved.`
+      : "API surface details remain unresolved because cited evidence did not support the generated claims."
+    : result.apiSurface.summary;
 
   const mcp = supported.has("mcp")
     ? result.mcp
@@ -188,16 +202,18 @@ export function removeUnsupportedClaims(
   }
 
   if (changed) {
-    researchNotes.push(
+    if (!supported.has("category")) unknownFields.add("category");
+    if (!supported.has("description")) unknownFields.add("description");
+    researchNotes = [
       "Unsupported claims were converted to unknown because no evidence item cited the affected fields.",
-    );
+    ];
   }
 
   return {
     ...result,
     authMethods,
     accessModel,
-    apiSurface: { ...result.apiSurface, rest, graphql, other },
+    apiSurface: { ...result.apiSurface, rest, graphql, other, summary: apiSummary },
     mcp,
     buildability,
     blocker: buildability === "buildable" ? null : blocker,

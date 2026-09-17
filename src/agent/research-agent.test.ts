@@ -214,9 +214,16 @@ describe("removeUnsupportedClaims", () => {
       other: [],
     });
     expect(normalized.unknownFields).toEqual(
-      expect.arrayContaining(["apiSurface.graphql", "apiSurface.other"]),
+      expect.arrayContaining([
+        "category",
+        "description",
+        "apiSurface.graphql",
+        "apiSurface.other",
+      ]),
     );
     expect(normalized.confidence).toBe("medium");
+    expect(normalized.apiSurface.summary).not.toContain("Several APIs");
+    expect(normalized.researchNotes).toHaveLength(1);
   });
 
   it("retains claims with explicit evidence support", () => {
