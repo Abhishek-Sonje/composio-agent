@@ -188,6 +188,30 @@ describe("applyConfidencePolicy", () => {
 });
 
 describe("removeUnsupportedClaims", () => {
+  it("demonstrates that an omitted synthesis mapping loses a discovered REST claim", () => {
+    const normalized = removeUnsupportedClaims({
+      ...result,
+      authMethods: ["OAuth 2.0"],
+      apiSurface: {
+        ...result.apiSurface,
+        rest: true,
+        summary: "The official REST API uses OAuth 2.0.",
+      },
+      evidence: [
+        {
+          title: "Authorization | REST API Developer Guide",
+          url: "https://example.com/rest/oauth",
+          sourceType: "official",
+          supports: ["authMethods"],
+        },
+      ],
+    });
+
+    expect(normalized.authMethods).toEqual(["OAuth 2.0"]);
+    expect(normalized.apiSurface.rest).toBeNull();
+    expect(normalized.unknownFields).toContain("apiSurface.rest");
+  });
+
   it("converts API claims without cited support to unknown", () => {
     const normalized = removeUnsupportedClaims({
       ...result,
