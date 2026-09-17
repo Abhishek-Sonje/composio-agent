@@ -63,7 +63,7 @@ describe("researchApp", () => {
 
     await researchApp(
       { name: "Example" },
-      { model, tools, maxSteps: 5, log: vi.fn() },
+      { model, tools, maxSteps: 3, log: vi.fn() },
     );
 
     expect(tools.search).toHaveBeenCalledOnce();

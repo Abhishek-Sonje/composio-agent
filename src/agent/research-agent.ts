@@ -64,6 +64,7 @@ type ResearchAgentDependencies = {
 const MAX_OBSERVATION_CHARACTERS = 12_000;
 const MAX_COLLECTION_ITEMS = 30;
 const MAX_NESTING_DEPTH = 8;
+const MIN_MEANINGFUL_RESEARCH_ACTIONS = 8;
 
 export function compactToolOutput(value: unknown): unknown {
   const budget = { remaining: MAX_OBSERVATION_CHARACTERS };
@@ -263,13 +264,20 @@ export async function researchApp(
         (observation) => observation.action === "fetch_url" && !observation.error,
       );
 
-      if (hasSearch && hasFetch) {
+      const minimumActions = Math.min(
+        MIN_MEANINGFUL_RESEARCH_ACTIONS,
+        Math.max(1, maxSteps - 1),
+      );
+      if (hasSearch && hasFetch && observations.length >= minimumActions) {
         stoppedBecause = "complete";
         log(`[${target.name}] Research complete: ${action.reason}`);
         break;
       }
 
-      const requiredAction = hasSearch ? "fetch_url" : "search";
+      const previousAction = observations.at(-1)?.action;
+      const requiredAction = !hasSearch || previousAction === "fetch_url"
+        ? "search"
+        : "fetch_url";
       log(
         `[${target.name}] More evidence required before completion: ${requiredAction}`,
       );
