@@ -19,6 +19,35 @@ type GenerateJson = (request: {
   schema: unknown;
 }) => Promise<string>;
 
+const MAX_MODEL_ATTEMPTS = 3;
+
+function isTransientModelError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /\b(429|503)\b|RESOURCE_EXHAUSTED|UNAVAILABLE/i.test(message);
+}
+
+export async function withTransientModelRetry<T>(
+  operation: () => Promise<T>,
+  sleep: (milliseconds: number) => Promise<void> = (milliseconds) =>
+    new Promise((resolve) => setTimeout(resolve, milliseconds)),
+): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= MAX_MODEL_ATTEMPTS; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (!isTransientModelError(error) || attempt === MAX_MODEL_ATTEMPTS) {
+        throw error;
+      }
+      await sleep(500 * attempt);
+    }
+  }
+
+  throw lastError;
+}
+
 function contextJson(context: Omit<ResearchContext, "stoppedBecause">): string {
   return JSON.stringify(context, null, 2);
 }
@@ -30,14 +59,16 @@ export function createGeminiResearchModel(
   const generate =
     generateJson ??
     (async ({ model, prompt, schema }) => {
-      const response = await gemini.client.models.generateContent({
-        model,
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseJsonSchema: schema,
-        },
-      });
+      const response = await withTransientModelRetry(() =>
+        gemini.client.models.generateContent({
+          model,
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json",
+            responseJsonSchema: schema,
+          },
+        }),
+      );
 
       if (!response.text) {
         throw new Error("Gemini returned an empty response");
@@ -84,4 +115,3 @@ ${JSON.stringify(context, null, 2)}`;
     },
   };
 }
-

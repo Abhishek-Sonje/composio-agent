@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createGeminiResearchModel } from "./gemini-model.js";
+import {
+  createGeminiResearchModel,
+  withTransientModelRetry,
+} from "./gemini-model.js";
 import type { GeminiClient } from "./gemini.js";
 
 const gemini = { model: "gemini-3.6-flash" } as GeminiClient;
@@ -43,5 +46,39 @@ describe("createGeminiResearchModel", () => {
         maxSteps: 10,
       }),
     ).rejects.toThrow();
+  });
+});
+
+describe("withTransientModelRetry", () => {
+  it("retries temporary provider failures with bounded backoff", async () => {
+    const operation = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("503 UNAVAILABLE"))
+      .mockResolvedValue("ok");
+    const sleep = vi.fn().mockResolvedValue(undefined);
+
+    await expect(withTransientModelRetry(operation, sleep)).resolves.toBe("ok");
+    expect(operation).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledWith(500);
+  });
+
+  it("does not retry permanent errors", async () => {
+    const operation = vi.fn().mockRejectedValue(new Error("400 INVALID_ARGUMENT"));
+
+    await expect(
+      withTransientModelRetry(operation, vi.fn()),
+    ).rejects.toThrowError(/INVALID_ARGUMENT/);
+    expect(operation).toHaveBeenCalledOnce();
+  });
+
+  it("stops after three transient failures", async () => {
+    const operation = vi.fn().mockRejectedValue(new Error("429 RESOURCE_EXHAUSTED"));
+    const sleep = vi.fn().mockResolvedValue(undefined);
+
+    await expect(withTransientModelRetry(operation, sleep)).rejects.toThrowError(
+      /RESOURCE_EXHAUSTED/,
+    );
+    expect(operation).toHaveBeenCalledTimes(3);
+    expect(sleep).toHaveBeenCalledTimes(2);
   });
 });
