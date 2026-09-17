@@ -85,11 +85,26 @@ describe("withTransientModelRetry", () => {
   });
 
   it("does not retry quota exhaustion", async () => {
-    const operation = vi.fn().mockRejectedValue(new Error("429 RESOURCE_EXHAUSTED"));
+    const operation = vi
+      .fn()
+      .mockRejectedValue(new Error("429 PerDay RESOURCE_EXHAUSTED"));
 
     await expect(
       withTransientModelRetry(operation, vi.fn()),
     ).rejects.toThrowError(/RESOURCE_EXHAUSTED/);
     expect(operation).toHaveBeenCalledOnce();
+  });
+
+  it("honors short per-minute retry windows", async () => {
+    const operation = vi
+      .fn()
+      .mockRejectedValueOnce(
+        new Error('429 PerMinute RESOURCE_EXHAUSTED "retryDelay":"2s"'),
+      )
+      .mockResolvedValue("ok");
+    const sleep = vi.fn().mockResolvedValue(undefined);
+
+    await expect(withTransientModelRetry(operation, sleep)).resolves.toBe("ok");
+    expect(sleep).toHaveBeenCalledWith(2_250);
   });
 });

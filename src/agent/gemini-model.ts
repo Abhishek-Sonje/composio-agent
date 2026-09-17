@@ -29,9 +29,16 @@ type GenerateJson = (request: {
 
 const MAX_MODEL_ATTEMPTS = 3;
 
-function isTransientModelError(error: unknown): boolean {
+function retryDelayMilliseconds(error: unknown, attempt: number): number | null {
   const message = error instanceof Error ? error.message : String(error);
-  return /\b503\b|UNAVAILABLE/i.test(message);
+  if (/\b503\b|UNAVAILABLE/i.test(message)) return 500 * attempt;
+  if (!/429|RESOURCE_EXHAUSTED/i.test(message) || !/PerMinute/i.test(message)) {
+    return null;
+  }
+
+  const delay = message.match(/retryDelay["']?\s*:\s*["']?(\d+(?:\.\d+)?)s/i)
+    ?? message.match(/retry in (\d+(?:\.\d+)?)s/i);
+  return delay ? Math.min(Math.ceil(Number(delay[1]) * 1_000) + 250, 30_000) : null;
 }
 
 export async function withTransientModelRetry<T>(
@@ -46,10 +53,11 @@ export async function withTransientModelRetry<T>(
       return await operation();
     } catch (error) {
       lastError = error;
-      if (!isTransientModelError(error) || attempt === MAX_MODEL_ATTEMPTS) {
+      const delay = retryDelayMilliseconds(error, attempt);
+      if (delay === null || attempt === MAX_MODEL_ATTEMPTS) {
         throw error;
       }
-      await sleep(500 * attempt);
+      await sleep(delay);
     }
   }
 
