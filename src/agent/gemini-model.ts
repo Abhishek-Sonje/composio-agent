@@ -23,7 +23,7 @@ const MAX_MODEL_ATTEMPTS = 3;
 
 function isTransientModelError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return /\b(429|503)\b|RESOURCE_EXHAUSTED|UNAVAILABLE/i.test(message);
+  return /\b503\b|UNAVAILABLE/i.test(message);
 }
 
 export async function withTransientModelRetry<T>(

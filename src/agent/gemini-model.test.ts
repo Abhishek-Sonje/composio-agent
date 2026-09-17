@@ -72,13 +72,22 @@ describe("withTransientModelRetry", () => {
   });
 
   it("stops after three transient failures", async () => {
-    const operation = vi.fn().mockRejectedValue(new Error("429 RESOURCE_EXHAUSTED"));
+    const operation = vi.fn().mockRejectedValue(new Error("503 UNAVAILABLE"));
     const sleep = vi.fn().mockResolvedValue(undefined);
 
     await expect(withTransientModelRetry(operation, sleep)).rejects.toThrowError(
-      /RESOURCE_EXHAUSTED/,
+      /UNAVAILABLE/,
     );
     expect(operation).toHaveBeenCalledTimes(3);
     expect(sleep).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry quota exhaustion", async () => {
+    const operation = vi.fn().mockRejectedValue(new Error("429 RESOURCE_EXHAUSTED"));
+
+    await expect(
+      withTransientModelRetry(operation, vi.fn()),
+    ).rejects.toThrowError(/RESOURCE_EXHAUSTED/);
+    expect(operation).toHaveBeenCalledOnce();
   });
 });

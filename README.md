@@ -104,7 +104,7 @@ Tests cover environment errors, target and result validation, prompt constructio
 
 ## Current limitations
 
-- Live research requires both provider keys and may consume Composio premium-tool allowance.
+- Live research requires both provider keys, consumes Gemini request quota, and may consume Composio premium-tool allowance.
 - Phase 1 has not yet been evaluated against the planned set of 3-5 diverse applications.
 - A malformed or schema-invalid final model response fails clearly; bounded repair is not yet implemented.
 - Search result and fetched-page payload sizes are not yet compacted. Real runs will show whether this needs improvement.
