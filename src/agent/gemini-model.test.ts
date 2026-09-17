@@ -14,7 +14,9 @@ describe("createGeminiResearchModel", () => {
       JSON.stringify({
         action: "search",
         query: "Example OAuth documentation",
+        url: null,
         purpose: "Verify supported authentication",
+        reason: null,
       }),
     );
     const model = createGeminiResearchModel(gemini, generate);

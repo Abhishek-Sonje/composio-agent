@@ -13,6 +13,14 @@ import {
 } from "./research-agent.js";
 import { appResearchResultSchema } from "./result-schema.js";
 
+const providerActionSchema = z.object({
+  action: z.enum(["search", "fetch_url", "finish"]),
+  query: z.string().nullable(),
+  url: z.string().nullable(),
+  purpose: z.string().nullable(),
+  reason: z.string().nullable(),
+});
+
 type GenerateJson = (request: {
   model: string;
   prompt: string;
@@ -91,10 +99,29 @@ Choose exactly one next action. Search for a specific unresolved question, fetch
       const text = await generate({
         model: gemini.model,
         prompt,
-        schema: z.toJSONSchema(researchActionSchema),
+        schema: z.toJSONSchema(providerActionSchema),
       });
 
-      return researchActionSchema.parse(JSON.parse(text));
+      const action = providerActionSchema.parse(JSON.parse(text));
+
+      if (action.action === "search") {
+        return researchActionSchema.parse({
+          action: action.action,
+          query: action.query,
+          purpose: action.purpose,
+        });
+      }
+      if (action.action === "fetch_url") {
+        return researchActionSchema.parse({
+          action: action.action,
+          url: action.url,
+          purpose: action.purpose,
+        });
+      }
+      return researchActionSchema.parse({
+        action: action.action,
+        reason: action.reason,
+      });
     },
 
     async createResult(context) {
