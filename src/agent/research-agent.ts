@@ -192,6 +192,14 @@ export function removeUnsupportedClaims(
   if (result.buildability !== "unknown" && buildability === "unknown") {
     markUnknown("buildability");
   }
+  const hasUsableApiSurface = rest === true || graphql === true || other.length > 0;
+  if (
+    buildability === "buildable" &&
+    (authMethods.length === 0 || accessModel === "unknown" || !hasUsableApiSurface)
+  ) {
+    buildability = "unknown";
+    markUnknown("buildability");
+  }
   const blocker = supported.has("blocker") || result.blocker === null ? result.blocker : null;
   if (result.blocker !== null && blocker === null) {
     markUnknown("blocker");

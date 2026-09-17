@@ -242,6 +242,27 @@ describe("removeUnsupportedClaims", () => {
 
     expect(normalized.authMethods).toEqual(["OAuth 2.0"]);
   });
+
+  it("does not retain buildable when credential access is unresolved", () => {
+    const normalized = removeUnsupportedClaims({
+      ...result,
+      authMethods: ["OAuth 2.0"],
+      accessModel: "unknown",
+      apiSurface: { ...result.apiSurface, rest: true },
+      buildability: "buildable",
+      evidence: [
+        {
+          title: "Developer docs",
+          url: "https://example.com/docs",
+          sourceType: "official",
+          supports: ["authMethods", "apiSurface.rest", "buildability"],
+        },
+      ],
+    });
+
+    expect(normalized.buildability).toBe("unknown");
+    expect(normalized.unknownFields).toContain("buildability");
+  });
 });
 
 describe("compactToolOutput", () => {
