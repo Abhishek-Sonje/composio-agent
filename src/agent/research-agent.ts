@@ -57,6 +57,55 @@ type ResearchAgentDependencies = {
   log?: ResearchLogger;
 };
 
+const MAX_OBSERVATION_CHARACTERS = 40_000;
+const MAX_COLLECTION_ITEMS = 30;
+const MAX_NESTING_DEPTH = 8;
+
+export function compactToolOutput(value: unknown): unknown {
+  const budget = { remaining: MAX_OBSERVATION_CHARACTERS };
+
+  function compact(input: unknown, depth: number): unknown {
+    if (budget.remaining <= 0) return "[truncated: character budget reached]";
+    if (depth > MAX_NESTING_DEPTH) return "[truncated: nesting limit reached]";
+
+    if (typeof input === "string") {
+      const length = Math.min(input.length, budget.remaining);
+      budget.remaining -= length;
+      return input.length > length ? `${input.slice(0, length)}[truncated]` : input;
+    }
+    if (
+      input === null ||
+      typeof input === "number" ||
+      typeof input === "boolean"
+    ) {
+      return input;
+    }
+    if (Array.isArray(input)) {
+      const items = input
+        .slice(0, MAX_COLLECTION_ITEMS)
+        .map((item) => compact(item, depth + 1));
+      if (input.length > items.length) {
+        items.push(`[truncated: ${input.length - items.length} more items]`);
+      }
+      return items;
+    }
+    if (typeof input === "object") {
+      const entries = Object.entries(input).slice(0, MAX_COLLECTION_ITEMS);
+      const output = Object.fromEntries(
+        entries.map(([key, item]) => [key, compact(item, depth + 1)]),
+      );
+      if (Object.keys(input).length > entries.length) {
+        output._truncated = "Additional object properties omitted";
+      }
+      return output;
+    }
+
+    return String(input);
+  }
+
+  return compact(value, 0);
+}
+
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -104,7 +153,7 @@ export async function researchApp(
         action: action.action,
         purpose: action.purpose,
         input,
-        output,
+        output: compactToolOutput(output),
       });
     } catch (error) {
       observations.push({
@@ -136,4 +185,3 @@ export async function researchApp(
   log(`[${target.name}] Confidence: ${result.confidence}`);
   return result;
 }
-

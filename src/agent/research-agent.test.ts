@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { researchApp, type ResearchModel } from "./research-agent.js";
+import {
+  compactToolOutput,
+  researchApp,
+  type ResearchModel,
+} from "./research-agent.js";
 
 const result = {
   app: "Example",
@@ -143,3 +147,18 @@ describe("researchApp", () => {
   });
 });
 
+describe("compactToolOutput", () => {
+  it("bounds large strings before they enter model context", () => {
+    const output = compactToolOutput({ content: "x".repeat(100_000) });
+
+    expect(JSON.stringify(output).length).toBeLessThan(41_000);
+    expect(output).toEqual({ content: expect.stringContaining("[truncated]") });
+  });
+
+  it("bounds large collections", () => {
+    const output = compactToolOutput(Array.from({ length: 100 }, (_, index) => index));
+
+    expect(output).toHaveLength(31);
+    expect(output).toContain("[truncated: 70 more items]");
+  });
+});
