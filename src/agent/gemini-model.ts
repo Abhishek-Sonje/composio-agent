@@ -3,9 +3,10 @@ import { z } from "zod";
 import type { GeminiClient } from "./gemini.js";
 import {
   applyFieldEvidence,
-  researchSynthesisSchema,
+  fieldEvidenceSchema,
 } from "./evidence-mapping.js";
 import {
+  EVIDENCE_MAPPING_INSTRUCTION,
   FINAL_RESULT_INSTRUCTION,
   RESEARCH_SYSTEM_INSTRUCTION,
   buildResearchPrompt,
@@ -144,14 +145,27 @@ ${FINAL_RESULT_INSTRUCTION}
 Research state and stopping condition:
 ${JSON.stringify(context, null, 2)}`;
 
-      const text = await generate({
+      const resultText = await generate({
         model: gemini.model,
         prompt,
-        schema: z.toJSONSchema(researchSynthesisSchema),
+        schema: z.toJSONSchema(appResearchResultSchema),
       });
+      const result = appResearchResultSchema.parse(JSON.parse(resultText));
 
-      const synthesis = researchSynthesisSchema.parse(JSON.parse(text));
-      return applyFieldEvidence(synthesis.result, synthesis.fieldEvidence);
+      const mappingText = await generate({
+        model: gemini.model,
+        prompt: `${EVIDENCE_MAPPING_INSTRUCTION}
+
+Candidate result and evidence list:
+${JSON.stringify(result, null, 2)}
+
+Gathered research observations:
+${JSON.stringify(context.observations, null, 2)}`,
+        schema: z.toJSONSchema(fieldEvidenceSchema),
+      });
+      const fieldEvidence = fieldEvidenceSchema.parse(JSON.parse(mappingText));
+
+      return applyFieldEvidence(result, fieldEvidence);
     },
   };
 }

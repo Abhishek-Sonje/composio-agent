@@ -38,6 +38,10 @@ Research this single application. Begin with official sources and work through m
 
 export const FINAL_RESULT_INSTRUCTION = `Produce the final structured research result using only the gathered evidence.
 
-For each evidence item, list the exact result fields it supports. Then complete fieldEvidence as a required field-by-field ledger. Each ledger array must contain only URLs from the evidence list that directly support that exact field. Use an empty array when no gathered source supports the field. REST evidence belongs in apiSurfaceRest and GraphQL evidence belongs in apiSurfaceGraphql; evidence for one does not support the other.
+For each evidence item, list the exact result fields it supports. Use sourceType "official" only for pages controlled by the application vendor or its official developer organization. Use null, "unknown", an empty list, and unknownFields as appropriate when the evidence does not resolve a field. A search that finds no result does not prove that an API or MCP server does not exist. Do not add facts from memory.`;
 
-Use sourceType "official" only for pages controlled by the application vendor or its official developer organization. Use null, "unknown", an empty list, and unknownFields as appropriate when the evidence does not resolve a field. A search that finds no result does not prove that an API or MCP server does not exist. Do not add facts from memory.`;
+export const EVIDENCE_MAPPING_INSTRUCTION = `Map the candidate result's existing evidence items to the exact fields they directly support.
+
+This is an evidence-mapping task only. Do not add claims, sources, or URLs. Every URL you return must exactly match a URL in the candidate evidence list. Review the gathered observation content rather than relying only on the evidence title.
+
+Complete every ledger array. Use an empty array when none of the gathered evidence directly supports that field. REST evidence belongs only in apiSurfaceRest; GraphQL evidence belongs only in apiSurfaceGraphql. Evidence for authentication does not automatically support accessModel. Evidence that an API exists does not automatically support buildability.`;

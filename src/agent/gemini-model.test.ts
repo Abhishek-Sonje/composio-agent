@@ -52,9 +52,7 @@ describe("createGeminiResearchModel", () => {
 
   it("uses the required field ledger as the authoritative evidence mapping", async () => {
     const evidenceUrl = "https://example.com/rest";
-    const generate = vi.fn().mockResolvedValue(
-      JSON.stringify({
-        result: {
+    const candidateResult = {
           app: "Example",
           category: "Productivity",
           description: "Example is a productivity application.",
@@ -80,8 +78,11 @@ describe("createGeminiResearchModel", () => {
             },
           ],
           researchNotes: [],
-        },
-        fieldEvidence: {
+        };
+    const generate = vi
+      .fn()
+      .mockResolvedValueOnce(JSON.stringify(candidateResult))
+      .mockResolvedValueOnce(JSON.stringify({
           app: [],
           category: [],
           description: [],
@@ -93,9 +94,7 @@ describe("createGeminiResearchModel", () => {
           mcp: [],
           buildability: [],
           blocker: [],
-        },
-      }),
-    );
+        }));
     const model = createGeminiResearchModel(gemini, generate);
 
     const output = await model.createResult({
@@ -110,6 +109,10 @@ describe("createGeminiResearchModel", () => {
       expect.objectContaining({
         evidence: [expect.objectContaining({ supports: ["apiSurface.rest"] })],
       }),
+    );
+    expect(generate).toHaveBeenCalledTimes(2);
+    expect(generate.mock.calls[1]?.[0].prompt).toContain(
+      "This is an evidence-mapping task only",
     );
   });
 });
