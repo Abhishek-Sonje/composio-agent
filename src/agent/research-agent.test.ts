@@ -58,7 +58,9 @@ describe("researchApp", () => {
     };
     const tools = {
       search: vi.fn().mockResolvedValue({ results: ["developers"] }),
-      fetchUrl: vi.fn().mockResolvedValue({ content: "OAuth 2.0" }),
+      fetchUrl: vi.fn().mockResolvedValue({
+        content: "OAuth 2.0, free developer access, REST API, GraphQL, and MCP",
+      }),
     };
 
     await researchApp(

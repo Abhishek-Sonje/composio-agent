@@ -47,6 +47,7 @@ export type ResearchModel = {
   chooseAction(
     context: Omit<ResearchContext, "stoppedBecause"> & {
       requiredAction?: "search" | "fetch_url";
+      missingEvidence?: string[];
     },
   ): Promise<ResearchAction>;
   createResult(context: ResearchContext): Promise<unknown>;
@@ -65,6 +66,21 @@ const MAX_OBSERVATION_CHARACTERS = 12_000;
 const MAX_COLLECTION_ITEMS = 30;
 const MAX_NESTING_DEPTH = 8;
 const MIN_MEANINGFUL_RESEARCH_ACTIONS = 8;
+
+function missingFetchedEvidence(observations: ResearchObservation[]): string[] {
+  const text = observations
+    .filter((item) => item.action === "fetch_url" && !item.error)
+    .map((item) => `${item.purpose}\n${item.input}\n${JSON.stringify(item.output)}`)
+    .join("\n");
+  const checks: Array<[string, RegExp]> = [
+    ["authentication", /\b(?:OAuth|API key|bearer token|basic auth|service account)\b/i],
+    ["access model", /\b(?:free|trial|paid|pricing|administrator|enterprise|partner|contact sales|developer edition)\b/i],
+    ["REST API", /\bREST(?:ful)?\s+API\b/i],
+    ["GraphQL API", /\bGraphQL\b/i],
+    ["MCP", /\b(?:Model Context Protocol|MCP)\b/i],
+  ];
+  return checks.filter(([, pattern]) => !pattern.test(text)).map(([field]) => field);
+}
 
 export function compactToolOutput(value: unknown): unknown {
   const budget = { remaining: MAX_OBSERVATION_CHARACTERS };
@@ -268,7 +284,13 @@ export async function researchApp(
         MIN_MEANINGFUL_RESEARCH_ACTIONS,
         Math.max(1, maxSteps - 1),
       );
-      if (hasSearch && hasFetch && observations.length >= minimumActions) {
+      const missingEvidence = missingFetchedEvidence(observations);
+      if (
+        hasSearch &&
+        hasFetch &&
+        observations.length >= minimumActions &&
+        missingEvidence.length === 0
+      ) {
         stoppedBecause = "complete";
         log(`[${target.name}] Research complete: ${action.reason}`);
         break;
@@ -289,6 +311,7 @@ export async function researchApp(
             stepsUsed: observations.length,
             maxSteps,
             requiredAction,
+            missingEvidence,
           }),
         );
         if (action.action === requiredAction) break;
