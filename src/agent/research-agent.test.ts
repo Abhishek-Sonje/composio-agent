@@ -1,12 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { AppResearchResult } from "./result-schema.js";
 import {
+  applyConfidencePolicy,
   compactToolOutput,
   researchApp,
   type ResearchModel,
 } from "./research-agent.js";
 
-const result = {
+const result: AppResearchResult = {
   app: "Example",
   category: "Productivity",
   description: "Example is a productivity application.",
@@ -33,7 +35,7 @@ const result = {
   ],
   evidence: [],
   researchNotes: ["Research budget was exhausted."],
-} as const;
+};
 
 describe("researchApp", () => {
   it("performs targeted actions until the model finishes", async () => {
@@ -147,11 +149,48 @@ describe("researchApp", () => {
   });
 });
 
+describe("applyConfidencePolicy", () => {
+  const context = {
+    target: { name: "Example" },
+    observations: [],
+    stepsUsed: 0,
+    maxSteps: 1,
+    stoppedBecause: "budget_exhausted" as const,
+  };
+
+  it("caps confidence when the research budget is exhausted", () => {
+    const normalized = applyConfidencePolicy(
+      {
+        ...result,
+        confidence: "high",
+        evidence: [
+          {
+            title: "Official docs",
+            url: "https://example.com/docs",
+            sourceType: "official",
+            supports: ["description"],
+          },
+        ],
+      },
+      context,
+    );
+
+    expect(normalized.confidence).toBe("medium");
+    expect(normalized.researchNotes.at(-1)).toMatch(/budget was exhausted/);
+  });
+
+  it("forces low confidence when no evidence was found", () => {
+    expect(
+      applyConfidencePolicy({ ...result, confidence: "high" }, context).confidence,
+    ).toBe("low");
+  });
+});
+
 describe("compactToolOutput", () => {
   it("bounds large strings before they enter model context", () => {
     const output = compactToolOutput({ content: "x".repeat(100_000) });
 
-    expect(JSON.stringify(output).length).toBeLessThan(41_000);
+    expect(JSON.stringify(output).length).toBeLessThan(13_000);
     expect(output).toEqual({ content: expect.stringContaining("[truncated]") });
   });
 

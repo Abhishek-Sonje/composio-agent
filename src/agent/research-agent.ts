@@ -57,7 +57,7 @@ type ResearchAgentDependencies = {
   log?: ResearchLogger;
 };
 
-const MAX_OBSERVATION_CHARACTERS = 40_000;
+const MAX_OBSERVATION_CHARACTERS = 12_000;
 const MAX_COLLECTION_ITEMS = 30;
 const MAX_NESTING_DEPTH = 8;
 
@@ -110,6 +110,31 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+export function applyConfidencePolicy(
+  result: AppResearchResult,
+  context: ResearchContext,
+): AppResearchResult {
+  const notes = [...result.researchNotes];
+  let confidence = result.confidence;
+
+  if (result.evidence.length === 0) {
+    confidence = "low";
+  } else if (
+    confidence === "high" &&
+    (context.stoppedBecause === "budget_exhausted" ||
+      !context.observations.some((observation) => observation.action === "fetch_url"))
+  ) {
+    confidence = "medium";
+    notes.push(
+      context.stoppedBecause === "budget_exhausted"
+        ? "Confidence was capped because the research budget was exhausted."
+        : "Confidence was capped because no source page was fetched for inspection.",
+    );
+  }
+
+  return { ...result, confidence, researchNotes: notes };
+}
+
 export async function researchApp(
   target: ResearchTarget,
   dependencies: ResearchAgentDependencies,
@@ -148,13 +173,17 @@ export async function researchApp(
           ? await tools.search(action.query)
           : await tools.fetchUrl(action.url);
 
+      const compactedOutput = compactToolOutput(output);
       observations.push({
         step,
         action: action.action,
         purpose: action.purpose,
         input,
-        output: compactToolOutput(output),
+        output: compactedOutput,
       });
+      log(
+        `[${target.name}] Evidence captured (${JSON.stringify(compactedOutput).length} characters)`,
+      );
     } catch (error) {
       observations.push({
         step,
@@ -172,16 +201,21 @@ export async function researchApp(
     log(`[${target.name}] Research budget exhausted (${maxSteps} steps)`);
   }
 
+  log(`[${target.name}] Synthesizing structured result`);
+  const context: ResearchContext = {
+    target,
+    observations,
+    stepsUsed: observations.length,
+    maxSteps,
+    stoppedBecause,
+  };
   const result = appResearchResultSchema.parse(
     await model.createResult({
-      target,
-      observations,
-      stepsUsed: observations.length,
-      maxSteps,
-      stoppedBecause,
+      ...context,
     }),
   );
+  const normalizedResult = applyConfidencePolicy(result, context);
 
-  log(`[${target.name}] Confidence: ${result.confidence}`);
-  return result;
+  log(`[${target.name}] Confidence: ${normalizedResult.confidence}`);
+  return normalizedResult;
 }
