@@ -26,6 +26,7 @@ export const researchSynthesisSchema = z.object({
 });
 
 export type FieldEvidence = z.infer<typeof fieldEvidenceSchema>;
+export type FetchedSource = { url: string; content: string };
 
 const fieldEvidenceMapping: Record<keyof FieldEvidence, ResearchField> = {
   app: "app",
@@ -51,10 +52,15 @@ function normalizeUrl(value: string): string {
 export function applyFieldEvidence(
   result: AppResearchResult,
   fieldEvidence: FieldEvidence,
-  fetchedUrls: string[],
+  fetchedSources: Array<string | FetchedSource>,
 ): AppResearchResult {
   const supportsByUrl = new Map<string, Set<ResearchField>>();
-  const fetched = new Set(fetchedUrls.map(normalizeUrl));
+  const fetched = new Map(
+    fetchedSources.map((source) => [
+      normalizeUrl(typeof source === "string" ? source : source.url),
+      typeof source === "string" ? "" : source.content,
+    ]),
+  );
 
   for (const [ledgerField, urls] of Object.entries(fieldEvidence) as Array<
     [keyof FieldEvidence, string[]]
@@ -67,6 +73,31 @@ export function applyFieldEvidence(
       supports.add(resultField);
       supportsByUrl.set(normalized, supports);
     }
+  }
+
+  // Exact protocol names in a fetched page are deterministic evidence for a
+  // positive technical-surface claim. This repairs missed ledger entries
+  // without inferring availability from model memory or search snippets.
+  for (const item of result.evidence) {
+    const normalized = normalizeUrl(item.url);
+    const content = fetched.get(normalized);
+    if (!content) continue;
+
+    const text = `${item.title}\n${item.url}\n${content}`;
+    const supports = supportsByUrl.get(normalized) ?? new Set<ResearchField>();
+    if (result.apiSurface.rest === true && /\bREST(?:ful)?\s+API\b/i.test(text)) {
+      supports.add("apiSurface.rest");
+    }
+    if (result.apiSurface.graphql === true && /\bGraphQL\b/i.test(text)) {
+      supports.add("apiSurface.graphql");
+    }
+    if (
+      result.mcp.status === "available" &&
+      /\b(?:Model Context Protocol|MCP (?:server|support|integration))\b/i.test(text)
+    ) {
+      supports.add("mcp");
+    }
+    if (supports.size > 0) supportsByUrl.set(normalized, supports);
   }
 
   const evidence = result.evidence.flatMap((item) => {

@@ -168,13 +168,16 @@ ${JSON.stringify(context.observations, null, 2)}`,
       });
       const fieldEvidence = fieldEvidenceSchema.parse(JSON.parse(mappingText));
 
-      const fetchedUrls = context.observations
+      const fetchedSources = context.observations
         .filter(
           (observation) =>
             observation.action === "fetch_url" && observation.error === undefined,
         )
-        .map((observation) => observation.input);
-      return applyFieldEvidence(result, fieldEvidence, fetchedUrls);
+        .map((observation) => ({
+          url: observation.input,
+          content: JSON.stringify(observation.output),
+        }));
+      return applyFieldEvidence(result, fieldEvidence, fetchedSources);
     },
   };
 }
