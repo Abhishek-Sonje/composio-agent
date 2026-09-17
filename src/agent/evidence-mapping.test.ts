@@ -73,6 +73,19 @@ describe("applyFieldEvidence", () => {
     ]);
   });
 
+  it("recovers an omitted REST mapping from the fetched source content", () => {
+    const mapped = applyFieldEvidence(result, ledger(), [
+      {
+        url: restUrl,
+        content: "This REST API developer guide documents available REST resources.",
+      },
+    ]);
+
+    expect(mapped.evidence).toEqual([
+      expect.objectContaining({ supports: ["apiSurface.rest"] }),
+    ]);
+  });
+
   it("does not preserve model-generated supports without ledger evidence", () => {
     const mapped = applyFieldEvidence(result, ledger(), [restUrl, graphqlUrl]);
 
