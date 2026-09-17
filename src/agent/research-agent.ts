@@ -324,9 +324,11 @@ export async function researchApp(
             purpose: `Find official evidence for ${missingEvidence.join(", ")}`,
           };
         } else {
-        throw new Error(
-          `Research model did not perform required ${requiredAction} action after 3 attempts`,
-        );
+          stoppedBecause = "complete";
+          log(
+            `[${target.name}] Research complete with unresolved evidence: ${missingEvidence.join(", ")}`,
+          );
+          break;
         }
       }
     }
