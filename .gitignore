@@ -3,5 +3,6 @@ dist/
 .env
 results/*.json
 results/*.jsonl
+results/**/*.json
+results/**/*.jsonl
 coverage/
-
