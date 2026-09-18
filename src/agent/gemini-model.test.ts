@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   createGeminiResearchModel,
+  withMalformedOutputRetry,
   withTransientModelRetry,
 } from "./gemini-model.js";
 import type { GeminiClient } from "./gemini.js";
@@ -193,5 +194,24 @@ describe("withTransientModelRetry", () => {
 
     await expect(withTransientModelRetry(operation, sleep)).resolves.toBe("ok");
     expect(sleep).toHaveBeenCalledWith(59_250);
+  });
+});
+
+describe("withMalformedOutputRetry", () => {
+  it("retries one malformed structured response", async () => {
+    const operation = vi
+      .fn()
+      .mockRejectedValueOnce(new SyntaxError("Unterminated string in JSON"))
+      .mockResolvedValue("valid");
+
+    await expect(withMalformedOutputRetry(operation)).resolves.toBe("valid");
+    expect(operation).toHaveBeenCalledTimes(2);
+  });
+
+  it("stops after two malformed structured responses", async () => {
+    const operation = vi.fn().mockRejectedValue(new SyntaxError("malformed"));
+
+    await expect(withMalformedOutputRetry(operation)).rejects.toThrow("malformed");
+    expect(operation).toHaveBeenCalledTimes(2);
   });
 });
