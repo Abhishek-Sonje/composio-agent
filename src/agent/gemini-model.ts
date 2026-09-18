@@ -43,7 +43,7 @@ function retryDelayMilliseconds(error: unknown, attempt: number): number | null 
 
   const delay = message.match(/retryDelay["']?\s*:\s*["']?(\d+(?:\.\d+)?)s/i)
     ?? message.match(/retry in (\d+(?:\.\d+)?)s/i);
-  return delay ? Math.min(Math.ceil(Number(delay[1]) * 1_000) + 250, 30_000) : null;
+  return delay ? Math.min(Math.ceil(Number(delay[1]) * 1_000) + 250, 60_000) : null;
 }
 
 export async function withTransientModelRetry<T>(
