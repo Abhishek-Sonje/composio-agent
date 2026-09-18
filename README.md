@@ -137,3 +137,18 @@ Tests cover environment errors, target and result validation, prompt constructio
 - Free-tier provider quotas may require several resumptions to finish all 100 targets.
 - Existing valid results are intentionally not overwritten by the batch.
 - The one-app CLI accepts a name only. Website, hint, and expected-category context are supplied automatically by the assessment batch.
+
+
+## Case-study page
+
+The final assessment case study is a dependency-free static site. Refresh its public data from the canonical Phase 4 outputs, then preview it locally:
+
+```bash
+npm run case-study:build
+npm run case-study:dev
+```
+
+Open `http://127.0.0.1:4173`. Deploy the complete `site/` directory to any static host; the page needs no API keys or server runtime. The generated site data preserves evidence URLs, source types, supported fields, confidence, and unknown fields.
+
+The case-study page never runs the research agent in the browser. To reproduce research or analysis, use the commands documented above.
+
