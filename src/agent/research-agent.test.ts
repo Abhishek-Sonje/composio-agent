@@ -389,6 +389,39 @@ describe("removeUnsupportedClaims", () => {
     expect(normalized.buildability).toBe("unknown");
     expect(normalized.unknownFields).toContain("buildability");
   });
+
+  it("derives buildable when all feasibility prerequisites are supported", () => {
+    const normalized = removeUnsupportedClaims({
+      ...result,
+      authMethods: ["OAuth 2.0"],
+      accessModel: "self_serve_free",
+      apiSurface: { ...result.apiSurface, rest: true },
+      buildability: "unknown",
+      evidence: [
+        {
+          title: "Authentication docs",
+          url: "https://example.com/auth",
+          sourceType: "official",
+          supports: ["authMethods"],
+        },
+        {
+          title: "Free developer account",
+          url: "https://example.com/signup",
+          sourceType: "official",
+          supports: ["accessModel"],
+        },
+        {
+          title: "REST API",
+          url: "https://example.com/rest",
+          sourceType: "official",
+          supports: ["apiSurface.rest"],
+        },
+      ],
+    });
+
+    expect(normalized.buildability).toBe("buildable");
+    expect(normalized.unknownFields).not.toContain("buildability");
+  });
 });
 
 describe("compactToolOutput", () => {
