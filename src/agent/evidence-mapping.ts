@@ -54,6 +54,26 @@ function escapeRegExp(value: string): string {
 }
 
 function authMethodMentioned(method: string, content: string): boolean {
+  const normalizedMethod = method.toLocaleLowerCase();
+  const concepts: Array<[RegExp, RegExp]> = [
+    [/oauth/, /\boauth(?:\s*2\.0)?\b/i],
+    [/personal access token/, /\bpersonal access tokens?\b|\bfine[- ]grained token\b/i],
+    [/github app/, /\bgithub app\b.{0,60}\b(?:access )?tokens?\b/i],
+    [/github_token/, /\bgithub_token\b/i],
+    [/bearer/, /\bbearer\b/i],
+    [/api[ _-]?key/, /\bapi[ _-]?keys?\b/i],
+    [/basic auth/, /\bbasic auth(?:entication)?\b/i],
+    [/client credentials/, /\bclient credentials?\b/i],
+    [/access token/, /\baccess tokens?\b/i],
+    [/cookie|session/, /\b(?:browser )?session cookies?\b/i],
+  ];
+  const matchingConcepts = concepts.filter(([methodPattern]) =>
+    methodPattern.test(normalizedMethod)
+  );
+  if (matchingConcepts.length > 0) {
+    return matchingConcepts.every(([, contentPattern]) => contentPattern.test(content));
+  }
+
   const escaped = method
     .trim()
     .split(/\s+/)
@@ -61,6 +81,79 @@ function authMethodMentioned(method: string, content: string): boolean {
     .join("\\s+")
     .replace(/(?:key|token|cookie)$/i, "$&s?");
   return new RegExp(`\\b${escaped}\\b`, "i").test(content);
+}
+
+function explicitAccessModel(
+  content: string,
+): Exclude<AppResearchResult["accessModel"], "unknown"> | undefined {
+  if (/\b(?:enterprise (?:subscription|plan|edition).{0,50}(?:required|only)|(?:requires?|available only).{0,50}enterprise)\b/i.test(content)) {
+    return "enterprise_only";
+  }
+  if (/\b(?:standalone contract|required.{0,30}(?:contact|talk to) (?:our )?sales|contact (?:our )?sales)\b/i.test(content)) {
+    return "contact_sales";
+  }
+  if (/\b(?:administrator|admin).{0,60}(?:approval|required|approve|enable|grant)\b/i.test(content)) {
+    return "admin_approval";
+  }
+  if (/\bpartner(?:ship)? (?:account|program|approval).{0,40}required\b/i.test(content)) {
+    return "partnership_required";
+  }
+  if (/\b(?:free developer (?:account|portal|sandbox|test account)|free (?:account|plan|workspace)|developer edition.{0,40}free|open[- ]source|self[- ]host)\b/i.test(content)) {
+    return "self_serve_free";
+  }
+  if (/\b(?:free )?trial\b/i.test(content)) return "self_serve_trial";
+  if (/\b(?:paid (?:subscription|account|plan)|subscription required)\b/i.test(content)) {
+    return "self_serve_paid";
+  }
+  return undefined;
+}
+
+function recoverExplicitClaims(
+  result: AppResearchResult,
+  fetched: Map<string, FetchedSource>,
+): AppResearchResult {
+  const officialTexts = result.evidence.flatMap((item) => {
+    const source = fetched.get(normalizeUrl(item.url));
+    return item.sourceType === "official" && source?.content
+      ? [`${item.title}\n${item.url}\n${source.content}`]
+      : [];
+  });
+  const officialText = officialTexts.join("\n");
+  const explicitlyNotRest =
+    /\b(?:not|isn't|is not)\s+(?:a\s+)?REST(?:ful)?\s+API\b|\bRPC[- ]style\b.{0,80}\bnot\s+(?:a\s+)?REST/i;
+  const recoveredRest = result.apiSurface.rest === null &&
+    !explicitlyNotRest.test(officialText) &&
+    /\bREST(?:ful)?\s+API\b/i.test(officialText);
+  const recoveredGraphql = result.apiSurface.graphql === null &&
+    /\bGraphQL\s+(?:API|endpoint)\b/i.test(officialText);
+  const recoveredAccess = result.accessModel === "unknown"
+    ? explicitAccessModel(officialText)
+    : undefined;
+  if (!recoveredRest && !recoveredGraphql && !recoveredAccess) return result;
+
+  const unknownFields = result.unknownFields.filter((field) =>
+    !(recoveredRest && field === "apiSurface.rest") &&
+    !(recoveredGraphql && field === "apiSurface.graphql") &&
+    !(recoveredAccess && field === "accessModel")
+  );
+  const supportedApis = [
+    recoveredRest || result.apiSurface.rest === true ? "REST" : null,
+    recoveredGraphql || result.apiSurface.graphql === true ? "GraphQL" : null,
+  ].filter((value): value is string => value !== null);
+
+  return {
+    ...result,
+    accessModel: recoveredAccess ?? result.accessModel,
+    apiSurface: {
+      ...result.apiSurface,
+      rest: recoveredRest ? true : result.apiSurface.rest,
+      graphql: recoveredGraphql ? true : result.apiSurface.graphql,
+      summary: supportedApis.length > 0
+        ? `Cited official evidence supports ${supportedApis.join(" and ")}.`
+        : result.apiSurface.summary,
+    },
+    unknownFields,
+  };
 }
 
 function contentSupportsField(
@@ -167,8 +260,9 @@ export function applyFieldEvidence(
         : source,
     ]),
   );
+  const effectiveResult = recoverExplicitClaims(result, fetched);
   const evidenceByUrl = new Map(
-    result.evidence.map((item) => [normalizeUrl(item.url), item]),
+    effectiveResult.evidence.map((item) => [normalizeUrl(item.url), item]),
   );
 
   for (const [ledgerField, urls] of Object.entries(fieldEvidence) as Array<
@@ -180,7 +274,7 @@ export function applyFieldEvidence(
       if (!fetched.has(normalized)) continue;
       const item = evidenceByUrl.get(normalized);
       if (!contentSupportsField(
-        result,
+        effectiveResult,
         resultField,
         fetched.get(normalized)?.content ?? "",
         item?.sourceType ?? "third_party",
@@ -197,42 +291,42 @@ export function applyFieldEvidence(
   // Exact protocol names in a fetched page are deterministic evidence for a
   // positive technical-surface claim. This repairs missed ledger entries
   // without inferring availability from model memory or search snippets.
-  for (const item of result.evidence) {
+  for (const item of effectiveResult.evidence) {
     const normalized = normalizeUrl(item.url);
     const source = fetched.get(normalized);
     if (!source?.content) continue;
 
     const text = `${item.title}\n${item.url}\n${source.content}`;
     const supports = supportsByUrl.get(normalized) ?? new Set<ResearchField>();
-    if (contentSupportsField(result, "authMethods", text, item.sourceType, item.url)) {
+    if (contentSupportsField(effectiveResult, "authMethods", text, item.sourceType, item.url)) {
       supports.add("authMethods");
     }
     if (
-      result.apiSurface.rest !== null &&
-      contentSupportsField(result, "apiSurface.rest", text, item.sourceType, item.url)
+      effectiveResult.apiSurface.rest !== null &&
+      contentSupportsField(effectiveResult, "apiSurface.rest", text, item.sourceType, item.url)
     ) {
       supports.add("apiSurface.rest");
     }
-    if (result.apiSurface.graphql === true && /\bGraphQL\b/i.test(text)) {
+    if (effectiveResult.apiSurface.graphql === true && /\bGraphQL\b/i.test(text)) {
       supports.add("apiSurface.graphql");
     }
     if (
-      result.accessModel !== "unknown" &&
-      contentSupportsField(result, "accessModel", text, item.sourceType, item.url)
+      effectiveResult.accessModel !== "unknown" &&
+      contentSupportsField(effectiveResult, "accessModel", text, item.sourceType, item.url)
     ) {
       supports.add("accessModel");
     }
     if (
-      result.mcp.status === "available" &&
-      contentSupportsField(result, "mcp", text, item.sourceType, item.url)
+      effectiveResult.mcp.status === "available" &&
+      contentSupportsField(effectiveResult, "mcp", text, item.sourceType, item.url)
     ) {
       supports.add("mcp");
     }
     if (supports.size > 0) supportsByUrl.set(normalized, supports);
   }
 
-  const supportedAuthMethods = result.authMethods.filter((method) =>
-    result.evidence.some((item) => {
+  const supportedAuthMethods = effectiveResult.authMethods.filter((method) =>
+    effectiveResult.evidence.some((item) => {
       const normalized = normalizeUrl(item.url);
       const source = fetched.get(normalized);
       return item.sourceType === "official" &&
@@ -247,7 +341,7 @@ export function applyFieldEvidence(
   }
 
   const seen = new Set<string>();
-  const evidence = result.evidence.flatMap((item) => {
+  const evidence = effectiveResult.evidence.flatMap((item) => {
     const normalized = normalizeUrl(item.url);
     if (seen.has(normalized)) return [];
     seen.add(normalized);
@@ -268,7 +362,7 @@ export function applyFieldEvidence(
   }
 
   return appResearchResultSchema.parse({
-    ...result,
+    ...effectiveResult,
     authMethods: supportedAuthMethods,
     evidence,
   });

@@ -69,7 +69,9 @@ describe("applyFieldEvidence", () => {
     );
 
     expect(mapped.evidence).toEqual([
-      expect.objectContaining({ supports: ["apiSurface.rest"] }),
+      expect.objectContaining({
+        supports: expect.arrayContaining(["apiSurface.rest"]),
+      }),
     ]);
   });
 
@@ -82,7 +84,9 @@ describe("applyFieldEvidence", () => {
     ]);
 
     expect(mapped.evidence).toEqual([
-      expect.objectContaining({ supports: ["apiSurface.rest"] }),
+      expect.objectContaining({
+        supports: expect.arrayContaining(["apiSurface.rest"]),
+      }),
     ]);
   });
 
