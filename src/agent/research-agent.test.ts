@@ -109,7 +109,7 @@ const result: AppResearchResult = {
 };
 
 describe("researchApp", () => {
-  it("performs targeted actions until the model finishes", async () => {
+  it("performs a targeted search and fetch for the current focus", async () => {
     const model: ResearchModel = {
       chooseAction: vi
         .fn()
@@ -122,8 +122,7 @@ describe("researchApp", () => {
           action: "fetch_url",
           url: "https://example.com/developers",
           purpose: "Inspect authentication documentation",
-        })
-        .mockResolvedValueOnce({ action: "finish", reason: "Enough evidence" }),
+        }),
       createResult: vi.fn().mockResolvedValue(result),
     };
     const tools = {
@@ -135,7 +134,7 @@ describe("researchApp", () => {
 
     await researchApp(
       { name: "Example" },
-      { model, tools, maxSteps: 3, log: vi.fn() },
+      { model, tools, maxSteps: 2, log: vi.fn() },
     );
 
     expect(tools.search).toHaveBeenCalledOnce();
@@ -155,7 +154,10 @@ describe("researchApp", () => {
       }),
     );
     expect(model.createResult).toHaveBeenCalledWith(
-      expect.objectContaining({ stepsUsed: 2, stoppedBecause: "complete" }),
+      expect.objectContaining({
+        stepsUsed: 2,
+        stoppedBecause: "budget_exhausted",
+      }),
     );
   });
 

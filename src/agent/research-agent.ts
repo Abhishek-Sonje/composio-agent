@@ -84,9 +84,17 @@ const RESEARCH_PRIORITIES: Array<[ResearchFocus, RegExp]> = [
   ["graphql", /\bGraphQL\b/i],
 ];
 
-function fetchedEvidenceText(observations: ResearchObservation[]): string {
+function fetchedEvidenceText(
+  observations: ResearchObservation[],
+  focus?: ResearchFocus,
+): string {
   return observations
-    .filter((item) => item.action === "fetch_url" && !item.error)
+    .filter(
+      (item) =>
+        item.action === "fetch_url" &&
+        !item.error &&
+        (focus === undefined || item.focus === focus),
+    )
     .map((item) => JSON.stringify(item.output))
     .join("\n");
 }
@@ -94,8 +102,8 @@ function fetchedEvidenceText(observations: ResearchObservation[]): string {
 export function selectResearchFocus(
   observations: ResearchObservation[],
 ): ResearchFocus | undefined {
-  const evidence = fetchedEvidenceText(observations);
   for (const [focus, pattern] of RESEARCH_PRIORITIES) {
+    const evidence = fetchedEvidenceText(observations, focus);
     if (pattern.test(evidence)) continue;
     const attempts = observations.filter(
       (item) => item.focus === focus && !item.error,
