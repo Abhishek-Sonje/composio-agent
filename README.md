@@ -1,6 +1,6 @@
 # Composio Application Research Agent
 
-Phase 1 of a take-home assessment for an AI Product Ops Intern role at Composio. The project researches one application at a time and returns evidence-backed, machine-readable integration findings.
+An evidence-backed application integration research pipeline for an AI Product Ops Intern take-home assessment at Composio. Phase 1's research agent is frozen; Phase 2 runs it sequentially across the supplied 100-app assessment.
 
 ## Current scope
 
@@ -10,8 +10,11 @@ The current implementation:
 - asks Gemini for one targeted research action at a time;
 - searches the web and fetches source pages through Composio;
 - stops when evidence is sufficient or the configured action budget is exhausted;
-- validates the final result at runtime; and
-- writes formatted JSON to `results/<application>.json`.
+- validates the final result at runtime;
+- writes formatted JSON to `results/<application>.json`;
+- parses and validates all 100 targets from the supplied assessment Markdown;
+- resumes batch execution by skipping schema-valid per-app results; and
+- maintains `results/run-manifest.json` and `results/research-dataset.json`.
 
 It intentionally does not include a database, dashboard, multi-agent system, browser automation, or the final case study.
 
@@ -92,20 +95,45 @@ npm run research -- Microsoft Teams
 
 The command logs the current research step, recoverable tool failures, stopping condition, final confidence, and saved result path. It never logs API keys.
 
+## Run or resume all assessment targets
+
+Keep the supplied assessment Markdown at the repository root under its original filename, then run:
+
+```bash
+npm run research:all
+```
+
+The batch validates that the assessment contains exactly 100 uniquely named, consecutively numbered targets before initializing provider clients. It runs sequentially and checks `results/<target>.json` before each research call. A schema-valid existing result is preserved and skipped, so the same command resumes an interrupted run.
+
+Generated files:
+
+- `results/<target>.json`: one complete validated result per application;
+- `results/run-manifest.json`: completed, failed, pending, unknown-heavy, confidence, action, and budget status;
+- `results/research-dataset.json`: combined schema-valid records generated from individual results.
+
+Daily or free-tier quota exhaustion is recorded and stops the batch cleanly. Update `GEMINI_API_KEY` and rerun `npm run research:all` to continue. Isolated app, tool, network, or schema failures are recorded while later apps continue when safe.
+
+To intentionally rerun one failed app, remove only that app's invalid or unwanted result file if one exists, then use:
+
+```bash
+npm run research -- "Application Name"
+```
+
+The assessment source and generated result JSON files remain untracked.
+
 ## Validation
 
 ```bash
-npm run check
 npm test
+npm run typecheck
 npm run build
 ```
 
-Tests cover environment errors, target and result validation, prompt construction, Composio tool routing, bounded stopping, recoverable tool failures, malformed model output, and JSON persistence. They do not attempt to unit-test LLM judgment.
+Tests cover environment errors, target and result validation, prompt construction, Composio tool routing, bounded stopping, recoverable tool failures, malformed model output, JSON persistence, assessment parsing, resume behavior, failure isolation, quota stopping, and combined-dataset validation. They do not attempt to unit-test LLM judgment.
 
 ## Current limitations
 
 - Live research requires both provider keys, consumes Gemini request quota, and may consume Composio premium-tool allowance.
-- Phase 1 has not yet been evaluated against the planned set of 3-5 diverse applications.
-- A malformed or schema-invalid final model response fails clearly; bounded repair is not yet implemented.
-- Search result and fetched-page payload sizes are not yet compacted. Real runs will show whether this needs improvement.
-- The CLI currently accepts a name only. Website and expected-category context are supported by the internal target schema but are not exposed as flags yet.
+- Free-tier provider quotas may require several resumptions to finish all 100 targets.
+- Existing valid results are intentionally not overwritten by the batch.
+- The one-app CLI accepts a name only. Website, hint, and expected-category context are supplied automatically by the assessment batch.
