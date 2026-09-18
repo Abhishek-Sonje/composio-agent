@@ -243,6 +243,13 @@ function contentSupportsField(
         /\bour MCP server\b/i.test(content));
   }
 
+  if (field === "mcp" && result.mcp.status !== "unknown") {
+    if (sourceType !== "official") return false;
+    const explicitNegative =
+      /\b(?:does not|doesn't|no longer) (?:offer|support|provide|have).{0,60}(?:official )?MCP (?:server|service)|\b(?:official )?MCP (?:server|service).{0,60}(?:is not supported|is unavailable|isn't available)\b/i;
+    return explicitNegative.test(content);
+  }
+
   return true;
 }
 
