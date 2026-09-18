@@ -126,13 +126,16 @@ Current research state:
 ${contextJson(context)}
 
 Choose exactly one next action. Search for a specific unresolved question, fetch a promising source URL for inspection, or finish only when the important fields have sufficient evidence.`;
+      const focusRequirement = context.researchFocus
+        ? `\nCurrent priority: ${context.researchFocus}. Research this field only. Prefer action "${context.preferredAction}". Do not research buildability directly; it is derived from authentication, access, and API evidence. Do not repeat searches for an absent API after this focus has been attempted.`
+        : "";
       const actionRequirement = context.requiredAction
         ? `\nYou must choose action "${context.requiredAction}" in this turn. Do not finish.`
         : "";
 
       const text = await generate({
         model: gemini.model,
-        prompt: `${prompt}${actionRequirement}`,
+        prompt: `${prompt}${focusRequirement}${actionRequirement}`,
         schema: z.toJSONSchema(providerActionSchema),
       });
 

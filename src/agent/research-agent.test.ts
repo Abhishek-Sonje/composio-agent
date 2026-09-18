@@ -104,7 +104,7 @@ describe("researchApp", () => {
     const tools = {
       search: vi.fn().mockResolvedValue({ results: ["developers"] }),
       fetchUrl: vi.fn().mockResolvedValue({
-        content: "OAuth 2.0, free developer access, REST API, GraphQL, and MCP",
+        content: "OAuth 2.0, free developer access, REST API, GraphQL, and an MCP server",
       }),
     };
 
@@ -115,6 +115,20 @@ describe("researchApp", () => {
 
     expect(tools.search).toHaveBeenCalledOnce();
     expect(tools.fetchUrl).toHaveBeenCalledOnce();
+    expect(model.chooseAction).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        researchFocus: "authentication",
+        preferredAction: "search",
+      }),
+    );
+    expect(model.chooseAction).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        researchFocus: "authentication",
+        preferredAction: "fetch_url",
+      }),
+    );
     expect(model.createResult).toHaveBeenCalledWith(
       expect.objectContaining({ stepsUsed: 2, stoppedBecause: "complete" }),
     );

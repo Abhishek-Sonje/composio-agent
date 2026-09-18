@@ -32,8 +32,16 @@ export type ResearchObservation = {
   purpose: string;
   input: string;
   output: unknown;
+  focus?: ResearchFocus;
   error?: string;
 };
+
+export type ResearchFocus =
+  | "authentication"
+  | "access"
+  | "rest"
+  | "mcp"
+  | "graphql";
 
 export type ResearchContext = {
   target: ResearchTarget;
@@ -48,6 +56,8 @@ export type ResearchModel = {
     context: Omit<ResearchContext, "stoppedBecause"> & {
       requiredAction?: "search" | "fetch_url";
       missingEvidence?: string[];
+      researchFocus?: ResearchFocus;
+      preferredAction?: "search" | "fetch_url";
     },
   ): Promise<ResearchAction>;
   createResult(context: ResearchContext): Promise<unknown>;
@@ -65,21 +75,51 @@ type ResearchAgentDependencies = {
 const MAX_OBSERVATION_CHARACTERS = 12_000;
 const MAX_COLLECTION_ITEMS = 30;
 const MAX_NESTING_DEPTH = 8;
-const MIN_MEANINGFUL_RESEARCH_ACTIONS = 8;
+const MAX_ACTIONS_PER_FOCUS = 2;
+const RESEARCH_PRIORITIES: Array<[ResearchFocus, RegExp]> = [
+  ["authentication", /\b(?:OAuth(?: 2\.0)?|API[ -]?key|bearer token|basic auth|personal access token|service account)\b/i],
+  ["access", /\b(?:free (?:developer|account|plan|workspace)|developer edition|sign up|self[- ]host|tech(?:nical)? admin|administrator.{0,50}(?:create|approve|enable|grant)|contact sales|enterprise plan|paid plan|trial)\b/i],
+  ["rest", /\bREST(?:ful)?\s+API\b|\/rest\//i],
+  ["mcp", /\b(?:Model Context Protocol|MCP (?:server|service|support|integration))\b/i],
+  ["graphql", /\bGraphQL\b/i],
+];
 
-function missingFetchedEvidence(observations: ResearchObservation[]): string[] {
-  const text = observations
+function fetchedEvidenceText(observations: ResearchObservation[]): string {
+  return observations
     .filter((item) => item.action === "fetch_url" && !item.error)
     .map((item) => `${item.purpose}\n${item.input}\n${JSON.stringify(item.output)}`)
     .join("\n");
-  const checks: Array<[string, RegExp]> = [
-    ["authentication", /\b(?:OAuth|API key|bearer token|basic auth|service account)\b/i],
-    ["access model", /\b(?:free|trial|paid|pricing|administrator|enterprise|partner|contact sales|developer edition)\b/i],
-    ["REST API", /\bREST(?:ful)?\s+API\b/i],
-    ["GraphQL API", /\bGraphQL\b/i],
-    ["MCP", /\b(?:Model Context Protocol|MCP)\b/i],
-  ];
-  return checks.filter(([, pattern]) => !pattern.test(text)).map(([field]) => field);
+}
+
+export function selectResearchFocus(
+  observations: ResearchObservation[],
+): ResearchFocus | undefined {
+  const evidence = fetchedEvidenceText(observations);
+  for (const [focus, pattern] of RESEARCH_PRIORITIES) {
+    if (pattern.test(evidence)) continue;
+    const attempts = observations.filter(
+      (item) => item.focus === focus && !item.error,
+    ).length;
+    if (attempts < MAX_ACTIONS_PER_FOCUS) return focus;
+  }
+  return undefined;
+}
+
+function preferredActionForFocus(
+  observations: ResearchObservation[],
+  focus: ResearchFocus,
+): "search" | "fetch_url" {
+  const previous = observations.findLast(
+    (item) => item.focus === focus && !item.error,
+  );
+  return previous?.action === "search" ? "fetch_url" : "search";
+}
+
+function missingFetchedEvidence(observations: ResearchObservation[]): string[] {
+  const text = fetchedEvidenceText(observations);
+  return RESEARCH_PRIORITIES
+    .filter(([, pattern]) => !pattern.test(text))
+    .map(([field]) => field);
 }
 
 export function compactToolOutput(value: unknown): unknown {
@@ -263,43 +303,41 @@ export async function researchApp(
   log(`[${target.name}] Research started`);
 
   for (let step = 1; step <= maxSteps; step += 1) {
+    const researchFocus = selectResearchFocus(observations);
+    const hasSearch = observations.some(
+      (observation) => observation.action === "search" && !observation.error,
+    );
+    const hasFetch = observations.some(
+      (observation) => observation.action === "fetch_url" && !observation.error,
+    );
+    if (researchFocus === undefined && hasSearch && hasFetch) {
+      stoppedBecause = "complete";
+      log(`[${target.name}] Research complete: priority fields covered or attempted`);
+      break;
+    }
+    const preferredAction = researchFocus
+      ? preferredActionForFocus(observations, researchFocus)
+      : "search";
     let action = researchActionSchema.parse(
       await model.chooseAction({
         target,
         observations,
         stepsUsed: observations.length,
         maxSteps,
+        ...(researchFocus ? { researchFocus } : {}),
+        preferredAction,
       }),
     );
 
     if (action.action === "finish") {
-      const hasSearch = observations.some(
-        (observation) => observation.action === "search" && !observation.error,
-      );
-      const hasFetch = observations.some(
-        (observation) => observation.action === "fetch_url" && !observation.error,
-      );
-
-      const minimumActions = Math.min(
-        MIN_MEANINGFUL_RESEARCH_ACTIONS,
-        Math.max(1, maxSteps - 1),
-      );
       const missingEvidence = missingFetchedEvidence(observations);
-      if (
-        hasSearch &&
-        hasFetch &&
-        observations.length >= minimumActions &&
-        missingEvidence.length === 0
-      ) {
+      if (researchFocus === undefined && hasSearch && hasFetch) {
         stoppedBecause = "complete";
         log(`[${target.name}] Research complete: ${action.reason}`);
         break;
       }
 
-      const previousAction = observations.at(-1)?.action;
-      const requiredAction = !hasSearch || previousAction === "fetch_url"
-        ? "search"
-        : "fetch_url";
+      const requiredAction = researchFocus ? preferredAction : "search";
       log(
         `[${target.name}] More evidence required before completion: ${requiredAction}`,
       );
@@ -312,6 +350,8 @@ export async function researchApp(
             maxSteps,
             requiredAction,
             missingEvidence,
+            ...(researchFocus ? { researchFocus } : {}),
+            preferredAction,
           }),
         );
         if (action.action === requiredAction) break;
@@ -320,8 +360,8 @@ export async function researchApp(
         if (requiredAction === "search") {
           action = {
             action: "search",
-            query: `${target.name} official ${missingEvidence.join(" ")} documentation`,
-            purpose: `Find official evidence for ${missingEvidence.join(", ")}`,
+            query: `${target.name} official ${researchFocus ?? "developer"} documentation`,
+            purpose: `Find official evidence for ${researchFocus ?? "developer access"}`,
           };
         } else {
           stoppedBecause = "complete";
@@ -352,6 +392,7 @@ export async function researchApp(
         purpose: action.purpose,
         input,
         output: compactedOutput,
+        ...(researchFocus ? { focus: researchFocus } : {}),
       });
       log(
         `[${target.name}] Evidence captured (${JSON.stringify(compactedOutput).length} characters)`,
@@ -363,6 +404,7 @@ export async function researchApp(
         purpose: action.purpose,
         input,
         output: null,
+        ...(researchFocus ? { focus: researchFocus } : {}),
         error: errorMessage(error),
       });
       log(`[${target.name}] Tool failed: ${errorMessage(error)}`);

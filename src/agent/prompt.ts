@@ -6,7 +6,9 @@ Research rules:
 - Prefer current official developer, product, help, authentication, and security documentation.
 - Use reputable third-party sources only when official sources cannot answer a question.
 - Treat search snippets as discovery hints. Fetch and inspect source pages before relying on them.
-- Gather evidence for the app description, category, authentication, credential access model, API surface, MCP status, and buildability.
+- Gather evidence for authentication, credential access model, usable public APIs, and MCP status before lower-priority API variants.
+- Treat buildability as a conclusion derived from authentication, credential access, and usable API evidence. Do not search for generic buildability claims.
+- Search for GraphQL at most once as a discovery question and fetch one promising official result when available. If none appears, leave it unknown and move on.
 - Do not invent endpoint counts, access requirements, authentication methods, MCP support, or blockers.
 - If evidence is missing or ambiguous, keep the affected field unknown and explain why.
 - Continue with targeted research when an important field lacks evidence.
