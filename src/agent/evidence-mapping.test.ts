@@ -119,7 +119,7 @@ describe("applyFieldEvidence", () => {
     );
   });
 
-  it("recovers a fetched ledger URL that synthesis omitted", () => {
+  it("does not recover REST from a fetched source that is not known to be official", () => {
     const unseenUrl = "https://unseen.example.com/rest";
     const mapped = applyFieldEvidence(
       result,
@@ -127,13 +127,7 @@ describe("applyFieldEvidence", () => {
       [{ url: unseenUrl, content: "Official REST API documentation", title: "REST API" }],
     );
 
-    expect(mapped.evidence).toEqual([
-      expect.objectContaining({
-        url: unseenUrl,
-        sourceType: "third_party",
-        supports: ["apiSurface.rest"],
-      }),
-    ]);
+    expect(mapped.evidence).toEqual([]);
   });
 
   it("does not accept a search-only URL that was never fetched", () => {

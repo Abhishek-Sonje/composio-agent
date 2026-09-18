@@ -96,7 +96,8 @@ function contentSupportsField(
     if (result.apiSurface.rest === true) {
       const explicitlyNotRest =
         /\b(?:not|isn't|is not)\s+(?:a\s+)?REST(?:ful)?\s+API\b|\bRPC[- ]style\b.{0,80}\bnot\s+(?:a\s+)?REST/i;
-      return !explicitlyNotRest.test(content) &&
+      return sourceType === "official" &&
+        !explicitlyNotRest.test(content) &&
         /\bREST(?:ful)?\s+API\b/i.test(content);
     }
     if (result.apiSurface.rest === false) {
