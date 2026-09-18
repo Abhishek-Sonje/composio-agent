@@ -92,16 +92,13 @@ Counts are multi-label. Known-auth denominator: 96/100.
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | AI, Research and Media-native | 10 | 5 | 2 | 6 | 2 | 8 |
 | Communications and Messaging | 10 | 7 | 1 | 4 | 1 | 9 |
-| CRM | 1 | 1 | 1 | 0 | 0 | 1 |
-| CRM and Sales | 9 | 9 | 3 | 6 | 3 | 6 |
+| CRM and Sales | 10 | 10 | 4 | 6 | 3 | 7 |
 | Data, SEO and Scraping | 10 | 2 | 3 | 7 | 3 | 6 |
 | Developer, Infra and Data platforms | 10 | 6 | 2 | 7 | 2 | 8 |
-| Ecommerce | 9 | 8 | 0 | 1 | 0 | 8 |
+| Ecommerce | 10 | 8 | 0 | 1 | 0 | 9 |
 | Finance and Fintech | 10 | 6 | 2 | 6 | 2 | 7 |
 | Marketing, Ads, Email and Social | 10 | 8 | 3 | 1 | 3 | 6 |
-| Payments & Business Infrastructure | 1 | 0 | 0 | 0 | 0 | 1 |
-| Productivity & Knowledge Management | 1 | 1 | 0 | 1 | 0 | 1 |
-| Productivity and Project Management | 9 | 9 | 2 | 5 | 2 | 7 |
+| Productivity and Project Management | 10 | 10 | 2 | 6 | 2 | 8 |
 | Support and Helpdesk | 10 | 8 | 3 | 7 | 3 | 7 |
 
 Detailed category metrics are in results/analysis.json.
