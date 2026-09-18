@@ -23,3 +23,9 @@ describe("buildResearchPrompt", () => {
   });
 });
 
+describe("final result instruction", () => {
+  it("requires relevant fetched sources to remain in the evidence list", async () => {
+    const { FINAL_RESULT_INSTRUCTION } = await import("./prompt.js");
+    expect(FINAL_RESULT_INSTRUCTION).toContain("every fetched source");
+  });
+});

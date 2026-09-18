@@ -138,4 +138,50 @@ describe("applyFieldEvidence", () => {
 
     expect(mapped.evidence).toEqual([]);
   });
+
+  it("rejects an enterprise-only mapping without enterprise access evidence", () => {
+    const enterpriseResult = { ...result, accessModel: "enterprise_only" as const };
+    const mapped = applyFieldEvidence(
+      enterpriseResult,
+      ledger({ accessModel: [restUrl] }),
+      [{ url: restUrl, content: "Use OAuth 2.0 to authorize API requests." }],
+    );
+
+    expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain(
+      "accessModel",
+    );
+  });
+
+  it("rejects a negative GraphQL claim without explicit negative evidence", () => {
+    const negativeResult = {
+      ...result,
+      apiSurface: { ...result.apiSurface, graphql: false },
+    };
+    const mapped = applyFieldEvidence(
+      negativeResult,
+      ledger({ apiSurfaceGraphql: [graphqlUrl] }),
+      [{ url: graphqlUrl, content: "No GraphQL documentation was discovered." }],
+    );
+
+    expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain(
+      "apiSurface.graphql",
+    );
+  });
+
+  it("does not treat an MCP client page as product MCP server evidence", () => {
+    const mcpResult = {
+      ...result,
+      mcp: { status: "available" as const },
+    };
+    const mapped = applyFieldEvidence(
+      mcpResult,
+      ledger({ mcp: [restUrl] }),
+      [{
+        url: restUrl,
+        content: "Example includes an MCP client that connects to external MCP servers.",
+      }],
+    );
+
+    expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain("mcp");
+  });
 });
