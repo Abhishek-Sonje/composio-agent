@@ -115,6 +115,16 @@ export function selectResearchFocus(
       (item) => item.focus === focus && !item.error,
     ).length;
     if (attempts < MAX_ACTIONS_BY_FOCUS[focus]) return focus;
+    if (focus === "graphql" && attempts === 1) {
+      const search = observations.find(
+        (item) => item.focus === "graphql" && item.action === "search" && !item.error,
+      );
+      const output = JSON.stringify(search?.output ?? "");
+      if (/\bGraphQL\s+(?:API|endpoint|documentation)\b/i.test(output) &&
+          /https?:\/\//i.test(output)) {
+        return "graphql";
+      }
+    }
   }
   return undefined;
 }
@@ -392,6 +402,20 @@ export async function researchApp(
           break;
         }
       }
+    }
+
+    const hasAccessSearch = observations.some(
+      (observation) =>
+        observation.focus === "access" &&
+        observation.action === "search" &&
+        !observation.error,
+    );
+    if (researchFocus === "access" && action.action === "search" && !hasAccessSearch) {
+      action = {
+        action: "search",
+        query: `${target.name} official developer signup API credentials pricing plan admin enterprise partner`,
+        purpose: "Find official documentation explaining how developers obtain API credentials",
+      };
     }
 
     log(
