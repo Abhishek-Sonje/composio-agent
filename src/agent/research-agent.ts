@@ -75,16 +75,10 @@ type ResearchAgentDependencies = {
 const MAX_OBSERVATION_CHARACTERS = 12_000;
 const MAX_COLLECTION_ITEMS = 30;
 const MAX_NESTING_DEPTH = 8;
-const MAX_ACTIONS_BY_FOCUS: Record<ResearchFocus, number> = {
-  authentication: 2,
-  access: 3,
-  rest: 2,
-  mcp: 2,
-  graphql: 1,
-};
+const MAX_ACTIONS_PER_FOCUS = 2;
 const RESEARCH_PRIORITIES: Array<[ResearchFocus, RegExp]> = [
   ["authentication", /\b(?:OAuth(?: 2\.0)?|API[ -]?key|bearer token|basic auth|personal access token|service account)\b/i],
-  ["access", /\b(?:free (?:developer|account|plan|workspace)|developer (?:edition|account|portal|sandbox|test account)|create (?:an? )?(?:account|app|credential|API key)|generate (?:an? )?(?:credential|API key|token)|sign up|self[- ]host|tech(?:nical)? admin|administrator.{0,50}(?:create|approve|enable|grant)|contact sales|enterprise (?:subscription|plan|edition)|paid (?:subscription|account|plan)|partner (?:account|program|approval)|trial)\b/i],
+  ["access", /\b(?:free (?:developer|account|plan|workspace)|developer edition|sign up|self[- ]host|tech(?:nical)? admin|administrator.{0,50}(?:create|approve|enable|grant)|contact sales|enterprise plan|paid plan|trial)\b/i],
   ["rest", /\bREST(?:ful)?\s+API\b|\/rest\//i],
   ["mcp", /\b(?:Model Context Protocol|MCP (?:server|service|support|integration))\b/i],
   ["graphql", /\bGraphQL\b/i],
@@ -114,17 +108,7 @@ export function selectResearchFocus(
     const attempts = observations.filter(
       (item) => item.focus === focus && !item.error,
     ).length;
-    if (attempts < MAX_ACTIONS_BY_FOCUS[focus]) return focus;
-    if (focus === "graphql" && attempts === 1) {
-      const search = observations.find(
-        (item) => item.focus === "graphql" && item.action === "search" && !item.error,
-      );
-      const output = JSON.stringify(search?.output ?? "");
-      if (/\bGraphQL\s+(?:API|endpoint|documentation)\b/i.test(output) &&
-          /https?:\/\//i.test(output)) {
-        return "graphql";
-      }
-    }
+    if (attempts < MAX_ACTIONS_PER_FOCUS) return focus;
   }
   return undefined;
 }
@@ -402,20 +386,6 @@ export async function researchApp(
           break;
         }
       }
-    }
-
-    const hasAccessSearch = observations.some(
-      (observation) =>
-        observation.focus === "access" &&
-        observation.action === "search" &&
-        !observation.error,
-    );
-    if (researchFocus === "access" && action.action === "search" && !hasAccessSearch) {
-      action = {
-        action: "search",
-        query: `${target.name} official developer signup API credentials pricing plan admin enterprise partner`,
-        purpose: "Find official documentation explaining how developers obtain API credentials",
-      };
     }
 
     log(
