@@ -53,6 +53,16 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function authMethodMentioned(method: string, content: string): boolean {
+  const escaped = method
+    .trim()
+    .split(/\s+/)
+    .map(escapeRegExp)
+    .join("\\s+")
+    .replace(/(?:key|token|cookie)$/i, "$&s?");
+  return new RegExp(`\\b${escaped}\\b`, "i").test(content);
+}
+
 function contentSupportsField(
   result: AppResearchResult,
   field: ResearchField,
@@ -62,9 +72,14 @@ function contentSupportsField(
 ): boolean {
   if (!content) return true;
 
+  if (field === "authMethods") {
+    return sourceType === "official" &&
+      result.authMethods.some((method) => authMethodMentioned(method, content));
+  }
+
   if (field === "accessModel") {
     const accessPatterns: Record<AppResearchResult["accessModel"], RegExp> = {
-      self_serve_free: /\b(?:free (?:account|plan|workspace)|developer edition.{0,40}free|open[- ]source|self[- ]host)/i,
+      self_serve_free: /\b(?:free (?:developer (?:account|portal|sandbox|test account)|account|plan|workspace)|developer edition.{0,40}free|open[- ]source|self[- ]host)/i,
       self_serve_trial: /\b(?:free )?trial\b/i,
       self_serve_paid: /\b(?:paid (?:account|plan)|subscription required)\b/i,
       admin_approval: /\b(?:tech(?:nical)? admin|administrator.{0,60}(?:approve|create|enable|grant|required))/i,
@@ -73,13 +88,30 @@ function contentSupportsField(
       contact_sales: /\bcontact (?:our )?sales\b/i,
       unknown: /$a/,
     };
-    return accessPatterns[result.accessModel].test(content);
+    return sourceType === "official" &&
+      accessPatterns[result.accessModel].test(content);
+  }
+
+  if (field === "apiSurface.rest") {
+    if (result.apiSurface.rest === true) {
+      const explicitlyNotRest =
+        /\b(?:not|isn't|is not)\s+(?:a\s+)?REST(?:ful)?\s+API\b|\bRPC[- ]style\b.{0,80}\bnot\s+(?:a\s+)?REST/i;
+      return !explicitlyNotRest.test(content) &&
+        /\bREST(?:ful)?\s+API\b/i.test(content);
+    }
+    if (result.apiSurface.rest === false) {
+      return sourceType === "official" &&
+        /\b(?:does not|doesn't|no longer) (?:offer|support|provide|have).{0,50}REST(?:ful)?\s+API|\bREST(?:ful)?\s+API.{0,50}(?:is not supported|is unavailable|isn't supported)\b/i.test(
+          content,
+        );
+    }
   }
 
   if (field === "apiSurface.graphql" && result.apiSurface.graphql === false) {
-    return /\b(?:does not|doesn't|no longer) (?:offer|support|provide|have).{0,50}GraphQL|\bGraphQL.{0,50}(?:is not supported|is unavailable|isn't supported)\b/i.test(
-      content,
-    );
+    return sourceType === "official" &&
+      /\b(?:does not|doesn't|no longer) (?:offer|support|provide|have).{0,50}GraphQL|\bGraphQL.{0,50}(?:is not supported|is unavailable|isn't supported)\b/i.test(
+        content,
+      );
   }
 
   if (field === "mcp" && result.mcp.status === "available") {
@@ -171,18 +203,23 @@ export function applyFieldEvidence(
 
     const text = `${item.title}\n${item.url}\n${source.content}`;
     const supports = supportsByUrl.get(normalized) ?? new Set<ResearchField>();
-    if (
-      result.authMethods.some((method) =>
-        text.toLocaleLowerCase().includes(method.toLocaleLowerCase()),
-      )
-    ) {
+    if (contentSupportsField(result, "authMethods", text, item.sourceType, item.url)) {
       supports.add("authMethods");
     }
-    if (result.apiSurface.rest === true && /\bREST(?:ful)?\s+API\b/i.test(text)) {
+    if (
+      result.apiSurface.rest !== null &&
+      contentSupportsField(result, "apiSurface.rest", text, item.sourceType, item.url)
+    ) {
       supports.add("apiSurface.rest");
     }
     if (result.apiSurface.graphql === true && /\bGraphQL\b/i.test(text)) {
       supports.add("apiSurface.graphql");
+    }
+    if (
+      result.accessModel !== "unknown" &&
+      contentSupportsField(result, "accessModel", text, item.sourceType, item.url)
+    ) {
+      supports.add("accessModel");
     }
     if (
       result.mcp.status === "available" &&
@@ -191,6 +228,21 @@ export function applyFieldEvidence(
       supports.add("mcp");
     }
     if (supports.size > 0) supportsByUrl.set(normalized, supports);
+  }
+
+  const supportedAuthMethods = result.authMethods.filter((method) =>
+    result.evidence.some((item) => {
+      const normalized = normalizeUrl(item.url);
+      const source = fetched.get(normalized);
+      return item.sourceType === "official" &&
+        source?.content !== undefined &&
+        supportsByUrl.get(normalized)?.has("authMethods") === true &&
+        (source.content === "" ||
+          authMethodMentioned(method, `${item.title}\n${source.content}`));
+    }),
+  );
+  if (supportedAuthMethods.length === 0) {
+    for (const supports of supportsByUrl.values()) supports.delete("authMethods");
   }
 
   const seen = new Set<string>();
@@ -214,5 +266,9 @@ export function applyFieldEvidence(
     });
   }
 
-  return appResearchResultSchema.parse({ ...result, evidence });
+  return appResearchResultSchema.parse({
+    ...result,
+    authMethods: supportedAuthMethods,
+    evidence,
+  });
 }
