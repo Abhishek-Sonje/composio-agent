@@ -87,7 +87,12 @@ function contentSupportsField(
       `\\b${app}(?:'s)?\\s+(?:hosted\\s+)?MCP\\s+servers?\\b|\\bMCP\\s+servers?\\s+(?:provided\\s+by\\s+)?${app}\\b`,
       "i",
     );
+    const officialProductMcp = new RegExp(
+      `\\b${app}(?:'s)?\\s+MCP\\b(?!\\s+client)`,
+      "i",
+    );
     return productServer.test(content) ||
+      (sourceType === "official" && officialProductMcp.test(content)) ||
       (sourceType === "official" && /\bour MCP server\b/i.test(content));
   }
 
