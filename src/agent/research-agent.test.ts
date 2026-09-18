@@ -25,6 +25,16 @@ describe("selectResearchFocus", () => {
     ).toBe("access");
   });
 
+  it("gives unresolved access a third action before moving to API variants", () => {
+    expect(
+      selectResearchFocus([
+        observation("authentication", "fetch_url", "OAuth 2.0 authentication"),
+        observation("access", "search", "Developer portal result"),
+        observation("access", "fetch_url", "Token authentication reference"),
+      ]),
+    ).toBe("access");
+  });
+
   it("does not revisit a supported field", () => {
     expect(
       selectResearchFocus([
@@ -69,6 +79,18 @@ describe("selectResearchFocus", () => {
         observation("mcp", "fetch_url", "Official MCP server"),
         observation("graphql", "search", "No official result found"),
         observation("graphql", "fetch_url", "General developer documentation"),
+      ]),
+    ).toBeUndefined();
+  });
+
+  it("does not spend a second action trying to prove missing GraphQL", () => {
+    expect(
+      selectResearchFocus([
+        observation("authentication", "fetch_url", "OAuth 2.0"),
+        observation("access", "fetch_url", "Create a free developer account"),
+        observation("rest", "fetch_url", "REST API"),
+        observation("mcp", "fetch_url", "Official MCP server"),
+        observation("graphql", "search", "No official GraphQL result found"),
       ]),
     ).toBeUndefined();
   });

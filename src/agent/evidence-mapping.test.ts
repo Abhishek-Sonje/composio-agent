@@ -159,6 +159,37 @@ describe("applyFieldEvidence", () => {
     );
   });
 
+  it("recovers official access evidence when synthesis omits the ledger mapping", () => {
+    const accessResult = { ...result, accessModel: "self_serve_free" as const };
+    const mapped = applyFieldEvidence(
+      accessResult,
+      ledger(),
+      [{
+        url: restUrl,
+        content: "Create a free developer account and generate credentials in the developer portal.",
+      }],
+    );
+
+    expect(mapped.evidence.flatMap((item) => item.supports)).toContain(
+      "accessModel",
+    );
+  });
+
+  it("rejects REST when official documentation explicitly describes an RPC API", () => {
+    const mapped = applyFieldEvidence(
+      result,
+      ledger({ apiSurfaceRest: [restUrl] }),
+      [{
+        url: restUrl,
+        content: "The Web API is an HTTP RPC-style API. While it is not a REST API, it uses HTTP requests.",
+      }],
+    );
+
+    expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain(
+      "apiSurface.rest",
+    );
+  });
+
   it("rejects a negative GraphQL claim without explicit negative evidence", () => {
     const negativeResult = {
       ...result,
@@ -173,6 +204,67 @@ describe("applyFieldEvidence", () => {
     expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain(
       "apiSurface.graphql",
     );
+  });
+
+  it("rejects an explicit negative GraphQL claim from a third-party source", () => {
+    const negativeResult = {
+      ...result,
+      apiSurface: { ...result.apiSurface, graphql: false },
+      evidence: [{
+        title: "Third-party API inventory",
+        url: graphqlUrl,
+        sourceType: "third_party" as const,
+        supports: ["apiSurface.graphql" as const],
+      }],
+    };
+    const mapped = applyFieldEvidence(
+      negativeResult,
+      ledger({ apiSurfaceGraphql: [graphqlUrl] }),
+      [{
+        url: graphqlUrl,
+        content: "This product does not provide a GraphQL API.",
+      }],
+    );
+
+    expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain(
+      "apiSurface.graphql",
+    );
+  });
+
+  it("removes auth methods supported only by unofficial reverse engineering", () => {
+    const unofficialUrl = "https://community.example.net/reverse-engineered-auth";
+    const authResult = {
+      ...result,
+      authMethods: ["OAuth 2.0", "Browser session cookies"],
+      evidence: [
+        {
+          title: "Official authentication",
+          url: restUrl,
+          sourceType: "official" as const,
+          supports: ["authMethods" as const],
+        },
+        {
+          title: "Reverse-engineered authentication",
+          url: unofficialUrl,
+          sourceType: "third_party" as const,
+          supports: ["authMethods" as const],
+        },
+      ],
+    };
+    const mapped = applyFieldEvidence(
+      authResult,
+      ledger({ authMethods: [restUrl, unofficialUrl] }),
+      [
+        { url: restUrl, content: "Use OAuth 2.0 to authorize API requests." },
+        {
+          url: unofficialUrl,
+          content: "This unofficial client reuses browser session cookies.",
+        },
+      ],
+    );
+
+    expect(mapped.authMethods).toEqual(["OAuth 2.0"]);
+    expect(mapped.evidence.map((item) => item.url)).not.toContain(unofficialUrl);
   });
 
   it("does not treat an MCP client page as product MCP server evidence", () => {
