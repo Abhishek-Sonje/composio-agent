@@ -129,10 +129,10 @@ Choose exactly one next action. Search for a specific unresolved question, fetch
       const focusDescriptions = {
         authentication: "which documented authentication method an integration uses",
         access:
-          "how a developer obtains credentials: self-serve signup, free or paid plan, administrator approval, enterprise gating, or self-hosting. Fetch an official account, plan, signup, self-hosting, or administrator-access page that explicitly states the access condition. Token creation instructions alone do not establish the access model. Do not research API endpoints for this focus",
-        rest: "whether an official usable REST API and endpoint documentation exist",
+          "how a developer obtains credentials: self-serve developer signup, credential or app creation, free/trial/paid plan, administrator approval, partner access, enterprise gating, or self-hosting. Search official developer onboarding, signup, pricing/plan, credential creation, administrator, and partner documentation. Fetch a page that explicitly states the access condition. Token creation instructions alone do not establish the access model. Do not research API endpoints for this focus",
+        rest: "whether official documentation explicitly describes a usable REST or RESTful API. An HTTP or RPC API is not automatically REST",
         mcp: "whether the product owner provides an official MCP server or service",
-        graphql: "whether an official GraphQL API is documented",
+        graphql: "whether an official GraphQL API is documented. Do not try to prove nonexistence when official documentation is absent",
       } as const;
       const focusRequirement = context.researchFocus
         ? `\nCurrent priority: ${context.researchFocus} — ${focusDescriptions[context.researchFocus]}. Research this question only. Prefer action "${context.preferredAction}". Do not move to another field. Do not research buildability directly; it is derived from authentication, access, and API evidence. Do not repeat searches for an absent API after this focus has been attempted.`
