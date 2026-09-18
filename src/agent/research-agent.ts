@@ -255,18 +255,25 @@ export function removeUnsupportedClaims(
     : { status: "unknown" as const, notes: "No cited evidence supports MCP status." };
   if (result.mcp.status !== "unknown" && mcp.status === "unknown") markUnknown("mcp");
 
-  let buildability = supported.has("buildability")
-    ? result.buildability
-    : "unknown";
-  if (result.buildability !== "unknown" && buildability === "unknown") {
-    markUnknown("buildability");
-  }
   const hasUsableApiSurface = rest === true || graphql === true || other.length > 0;
+  const hasBuildabilityPrerequisites =
+    authMethods.length > 0 && accessModel !== "unknown" && hasUsableApiSurface;
+  let buildability: AppResearchResult["buildability"];
   if (
-    buildability === "buildable" &&
-    (authMethods.length === 0 || accessModel === "unknown" || !hasUsableApiSurface)
+    hasBuildabilityPrerequisites &&
+    (result.buildability === "unknown" || result.buildability === "buildable")
   ) {
+    buildability = "buildable";
+    unknownFields.delete("buildability");
+  } else {
+    buildability = supported.has("buildability")
+      ? result.buildability
+      : "unknown";
+  }
+  if (buildability === "buildable" && !hasBuildabilityPrerequisites) {
     buildability = "unknown";
+  }
+  if (result.buildability !== "unknown" && buildability === "unknown") {
     markUnknown("buildability");
   }
   const blocker = supported.has("blocker") || result.blocker === null ? result.blocker : null;
