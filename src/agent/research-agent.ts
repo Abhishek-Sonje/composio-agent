@@ -87,7 +87,7 @@ const RESEARCH_PRIORITIES: Array<[ResearchFocus, RegExp]> = [
 function fetchedEvidenceText(observations: ResearchObservation[]): string {
   return observations
     .filter((item) => item.action === "fetch_url" && !item.error)
-    .map((item) => `${item.purpose}\n${item.input}\n${JSON.stringify(item.output)}`)
+    .map((item) => JSON.stringify(item.output))
     .join("\n");
 }
 
