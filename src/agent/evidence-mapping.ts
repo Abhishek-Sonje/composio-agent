@@ -58,6 +58,7 @@ function contentSupportsField(
   field: ResearchField,
   content: string,
   sourceType: "official" | "third_party",
+  sourceUrl: string,
 ): boolean {
   if (!content) return true;
 
@@ -91,9 +92,29 @@ function contentSupportsField(
       `\\b${app}(?:'s)?\\s+MCP\\b(?!\\s+client)`,
       "i",
     );
-    return productServer.test(content) ||
-      (sourceType === "official" && officialProductMcp.test(content)) ||
-      (sourceType === "official" && /\bour MCP server\b/i.test(content));
+    const appSlug = result.app.toLocaleLowerCase().replace(/[^a-z0-9]/g, "");
+    let productOwnedSource = false;
+    try {
+      const parsed = new URL(sourceUrl);
+      const hostSlug = parsed.hostname
+        .replace(/^www\./, "")
+        .toLocaleLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+      const organization = parsed.pathname.split("/").filter(Boolean)[0]
+        ?.toLocaleLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+      productOwnedSource = hostSlug.includes(appSlug) ||
+        (parsed.hostname.toLocaleLowerCase() === "github.com" &&
+          organization !== undefined &&
+          organization.includes(appSlug));
+    } catch {
+      productOwnedSource = false;
+    }
+    return sourceType === "official" &&
+      productOwnedSource &&
+      (productServer.test(content) ||
+        officialProductMcp.test(content) ||
+        /\bour MCP server\b/i.test(content));
   }
 
   return true;
@@ -130,6 +151,7 @@ export function applyFieldEvidence(
         resultField,
         fetched.get(normalized)?.content ?? "",
         item?.sourceType ?? "third_party",
+        url,
       )) {
         continue;
       }
@@ -164,7 +186,7 @@ export function applyFieldEvidence(
     }
     if (
       result.mcp.status === "available" &&
-      contentSupportsField(result, "mcp", text, item.sourceType)
+      contentSupportsField(result, "mcp", text, item.sourceType, item.url)
     ) {
       supports.add("mcp");
     }
