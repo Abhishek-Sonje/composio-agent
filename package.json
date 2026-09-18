@@ -12,6 +12,8 @@
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "research": "npm run build --silent && node --env-file-if-exists=.env dist/index.js",
+    "research:all": "npm run build --silent && node --env-file-if-exists=.env dist/batch.js",
+    "typecheck": "npm run check",
     "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
