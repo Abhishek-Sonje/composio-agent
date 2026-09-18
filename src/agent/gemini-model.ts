@@ -126,8 +126,16 @@ Current research state:
 ${contextJson(context)}
 
 Choose exactly one next action. Search for a specific unresolved question, fetch a promising source URL for inspection, or finish only when the important fields have sufficient evidence.`;
+      const focusDescriptions = {
+        authentication: "which documented authentication method an integration uses",
+        access:
+          "how a developer obtains credentials: self-serve signup, free or paid plan, administrator approval, enterprise gating, or self-hosting. Do not research API endpoints for this focus",
+        rest: "whether an official usable REST API and endpoint documentation exist",
+        mcp: "whether the product owner provides an official MCP server or service",
+        graphql: "whether an official GraphQL API is documented",
+      } as const;
       const focusRequirement = context.researchFocus
-        ? `\nCurrent priority: ${context.researchFocus}. Research this field only. Prefer action "${context.preferredAction}". Do not research buildability directly; it is derived from authentication, access, and API evidence. Do not repeat searches for an absent API after this focus has been attempted.`
+        ? `\nCurrent priority: ${context.researchFocus} — ${focusDescriptions[context.researchFocus]}. Research this question only. Prefer action "${context.preferredAction}". Do not move to another field. Do not research buildability directly; it is derived from authentication, access, and API evidence. Do not repeat searches for an absent API after this focus has been attempted.`
         : "";
       const actionRequirement = context.requiredAction
         ? `\nYou must choose action "${context.requiredAction}" in this turn. Do not finish.`
