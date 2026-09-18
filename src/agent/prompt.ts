@@ -36,7 +36,7 @@ export function buildResearchPrompt(target: ResearchTarget): string {
 Research this single application. Begin with official sources and work through missing fields methodically. Each tool call must answer a specific unresolved question. Search results are discovery hints only: fetch the underlying source pages that support important fields before finishing. Keep source URLs and the claims they support for the final structured result.`;
 }
 
-export const FINAL_RESULT_INSTRUCTION = `Produce the final structured research result using only the gathered evidence.
+export const FINAL_RESULT_INSTRUCTION = `Produce the final structured research result using only the gathered evidence. Include every fetched source that directly supports a retained claim in the evidence list; do not omit a relevant fetched source merely because another source was already cited.
 
 For each evidence item, list the exact result fields it supports. Use sourceType "official" only for pages controlled by the application vendor or its official developer organization. Use null, "unknown", an empty list, and unknownFields as appropriate when the evidence does not resolve a field. A search that finds no result does not prove that an API or MCP server does not exist. Do not add facts from memory.`;
 
