@@ -1,4 +1,41 @@
-# Phase 3B validation report
+# Phase 3B experiment and final restoration report
+
+## Final restored-controller outcome
+
+After the Phase 3B coverage experiment failed, the research-control files were restored exactly to the validated Phase 3 commit `ac42293`. Only the independently verified semantic safeguards were retained: explicit official REST semantics, explicit official negative GraphQL evidence, per-method official authentication support, and explicit official negative MCP evidence.
+
+The same 14 applications and 98 feasibility fields were then rerun once. Otter AI received one bounded retry after a temporary provider `503`; no completed app was rerun during that retry.
+
+| Metric | Phase 3 baseline | Failed Phase 3B | Final restored controller |
+| --- | ---: | ---: | ---: |
+| Correct | 58 | 50 | 56 |
+| Incorrect | 2 | 0 | 0 |
+| Unsupported | 2 | 2 | 0 |
+| Unnecessary unknown | 23 | 34 | 28 |
+| Correctly unknown | 13 | 12 | 14 |
+| Precision | 93.55% | 96.15% | 100.00% |
+| Coverage miss rate | 24.47% | 35.42% | 28.57% |
+
+The final run did not exactly reproduce the earlier live coverage rate because search and model outputs vary. It recovered most of the Phase 3B coverage loss while eliminating all sampled incorrect and unsupported surviving claims. Per instruction, the remaining unknowns are accepted and no further coverage optimization will be attempted.
+
+Zendesk and NotebookLM were both rerun after the negative-MCP safeguard. Their MCP fields are now `unknown`; neither client documentation nor third-party MCP tooling is allowed to establish that the product lacks an official MCP server.
+
+| Application | Auth | Access | REST | GraphQL | MCP | Buildability | Blocker |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Salesforce | correct | correct | correct | correct | correct | correct | correct |
+| HubSpot | correct | unnecessary_unknown | correct | correct | correct | unnecessary_unknown | correct |
+| Zendesk | correct | correct | unnecessary_unknown | correct | correctly_unknown | correct | correct |
+| Slack | correct | correct | unnecessary_unknown | correctly_unknown | correct | correct | correct |
+| Shopify | correct | unnecessary_unknown | correct | correct | unnecessary_unknown | unnecessary_unknown | correct |
+| Firecrawl | correct | unnecessary_unknown | unnecessary_unknown | correctly_unknown | correct | unnecessary_unknown | correct |
+| GitHub | correct | correct | correct | unnecessary_unknown | correct | correct | correct |
+| Linear | correct | unnecessary_unknown | correctly_unknown | correct | correct | unnecessary_unknown | correct |
+| ClickUp | correct | unnecessary_unknown | unnecessary_unknown | correctly_unknown | correct | unnecessary_unknown | correct |
+| Stripe | correct | unnecessary_unknown | unnecessary_unknown | correctly_unknown | correct | unnecessary_unknown | correct |
+| PitchBook | correct | unnecessary_unknown | correct | correctly_unknown | correct | correct | correct |
+| NotebookLM | unnecessary_unknown | correct | unnecessary_unknown | correctly_unknown | correctly_unknown | unnecessary_unknown | unnecessary_unknown |
+| Otter AI | correct | correct | unnecessary_unknown | correctly_unknown | unnecessary_unknown | unnecessary_unknown | correct |
+| Mermaid CLI | correct | correctly_unknown | correctly_unknown | correctly_unknown | correctly_unknown | unnecessary_unknown | correct |
 
 Validated on 2026-09-18 against the same 14 applications and 98 feasibility fields used in Phase 3. The current generated files were inspected directly; no manual values were inserted into the dataset.
 
@@ -18,7 +55,7 @@ The first Phase 3B run exposed overly literal authentication matching and loss o
 
 The corrected run did not meet the coverage goal. Although precision improved relative to the Phase 3 baseline, unnecessary unknowns increased from 23 to 34.
 
-## Corrected-run classifications
+## Failed Phase 3B run classifications
 
 | Application | Auth | Access | REST | GraphQL | MCP | Buildability | Blocker |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -76,18 +113,23 @@ Phase 3B commits:
 - `58eed16 test: reproduce unsupported negative MCP claims`
 - `f1e32ce fix: require explicit official negative MCP evidence`
 
-Validation after the final semantic safeguard:
+Final restoration commits:
 
-- Tests: 81 passing across 11 test files
+- `b05fa0e revert: restore validated Phase 3 research control`
+- `1281b5d fix: retain verified semantic evidence safeguards`
+
+Final validation:
+
+- Tests: 73 passing across 11 test files
 - TypeScript check: passing
 - Production build: passing
 - Research action limit: 10
 - Full dataset manifest: 100 completed, 0 failed, 0 pending
 
-## Recommendation
+## Final decision
 
-**Do not freeze the research pipeline yet.**
+**The research pipeline is frozen.**
 
-Phase 3B improved semantic precision but failed its coverage success condition. The evidence rules should remain strict, including the final negative-MCP safeguard. The next change, if authorized, should be limited to making high-value official source acquisition more repeatable; increasing the budget or weakening validators would not address the observed source-discovery variance.
+The Phase 3B coverage experiment remains documented above as a failed experiment. The final pipeline uses the Phase 3 research controller plus the four independently justified semantic safeguards. It has no incorrect or unsupported surviving fields in the final 14-app audit. Remaining unnecessary and legitimate unknowns are accepted rather than prompting another research-control iteration.
 
 Phase 4 was not started.
