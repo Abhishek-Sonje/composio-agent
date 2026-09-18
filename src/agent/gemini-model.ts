@@ -198,6 +198,7 @@ ${JSON.stringify(context.observations, null, 2)}`,
         .map((observation) => ({
           url: observation.input,
           content: JSON.stringify(observation.output),
+          title: observation.purpose,
         }));
       return applyFieldEvidence(result, fieldEvidence, fetchedSources);
     },

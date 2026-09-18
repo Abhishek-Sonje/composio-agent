@@ -26,7 +26,7 @@ export const researchSynthesisSchema = z.object({
 });
 
 export type FieldEvidence = z.infer<typeof fieldEvidenceSchema>;
-export type FetchedSource = { url: string; content: string };
+export type FetchedSource = { url: string; content: string; title?: string };
 
 const fieldEvidenceMapping: Record<keyof FieldEvidence, ResearchField> = {
   app: "app",
@@ -103,7 +103,9 @@ export function applyFieldEvidence(
   const fetched = new Map(
     fetchedSources.map((source) => [
       normalizeUrl(typeof source === "string" ? source : source.url),
-      typeof source === "string" ? "" : source.content,
+      typeof source === "string"
+        ? { url: source, content: "" }
+        : source,
     ]),
   );
   const evidenceByUrl = new Map(
@@ -118,15 +120,12 @@ export function applyFieldEvidence(
       const normalized = normalizeUrl(url);
       if (!fetched.has(normalized)) continue;
       const item = evidenceByUrl.get(normalized);
-      if (
-        item &&
-        !contentSupportsField(
-          result,
-          resultField,
-          fetched.get(normalized) ?? "",
-          item.sourceType,
-        )
-      ) {
+      if (!contentSupportsField(
+        result,
+        resultField,
+        fetched.get(normalized)?.content ?? "",
+        item?.sourceType ?? "third_party",
+      )) {
         continue;
       }
       const supports = supportsByUrl.get(normalized) ?? new Set<ResearchField>();
@@ -140,10 +139,10 @@ export function applyFieldEvidence(
   // without inferring availability from model memory or search snippets.
   for (const item of result.evidence) {
     const normalized = normalizeUrl(item.url);
-    const content = fetched.get(normalized);
-    if (!content) continue;
+    const source = fetched.get(normalized);
+    if (!source?.content) continue;
 
-    const text = `${item.title}\n${item.url}\n${content}`;
+    const text = `${item.title}\n${item.url}\n${source.content}`;
     const supports = supportsByUrl.get(normalized) ?? new Set<ResearchField>();
     if (
       result.authMethods.some((method) =>
@@ -167,10 +166,26 @@ export function applyFieldEvidence(
     if (supports.size > 0) supportsByUrl.set(normalized, supports);
   }
 
+  const seen = new Set<string>();
   const evidence = result.evidence.flatMap((item) => {
-    const supports = [...(supportsByUrl.get(normalizeUrl(item.url)) ?? [])];
+    const normalized = normalizeUrl(item.url);
+    if (seen.has(normalized)) return [];
+    seen.add(normalized);
+    const supports = [...(supportsByUrl.get(normalized) ?? [])];
     return supports.length > 0 ? [{ ...item, supports }] : [];
   });
+
+  for (const [normalized, supports] of supportsByUrl) {
+    if (seen.has(normalized) || supports.size === 0) continue;
+    const source = fetched.get(normalized);
+    if (!source) continue;
+    evidence.push({
+      title: source.title ?? source.url,
+      url: source.url,
+      sourceType: "third_party",
+      supports: [...supports],
+    });
+  }
 
   return appResearchResultSchema.parse({ ...result, evidence });
 }

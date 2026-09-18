@@ -42,6 +42,6 @@ For each evidence item, list the exact result fields it supports. Use sourceType
 
 export const EVIDENCE_MAPPING_INSTRUCTION = `Map the candidate result's existing evidence items to the exact fields they directly support.
 
-This is an evidence-mapping task only. Do not add claims, sources, or URLs. Every URL you return must exactly match a URL in the candidate evidence list. Review the gathered observation content rather than relying only on the evidence title.
+This is an evidence-mapping task only. Do not add claims or URLs. Every URL you return must exactly match a successfully fetched URL in the gathered observations. Include a fetched URL even when candidate synthesis accidentally omitted it from the evidence list. Review the gathered observation content rather than relying only on the evidence title.
 
 Complete every ledger array. Use an empty array when none of the gathered evidence directly supports that field. REST evidence belongs only in apiSurfaceRest; GraphQL evidence belongs only in apiSurfaceGraphql. Evidence for authentication does not automatically support accessModel. Evidence that an API exists does not automatically support buildability.`;
