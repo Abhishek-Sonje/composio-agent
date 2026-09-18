@@ -35,6 +35,19 @@ describe("selectResearchFocus", () => {
     ).toBe("mcp");
   });
 
+  it("does not treat action metadata as fetched evidence", () => {
+    expect(
+      selectResearchFocus([
+        observation("authentication", "fetch_url", "OAuth 2.0 authentication"),
+        {
+          ...observation("access", "fetch_url", "OAuth setup instructions"),
+          purpose: "Find free developer access and signup documentation",
+          input: "https://example.com/free-developer-access",
+        },
+      ]),
+    ).toBe("access");
+  });
+
   it("limits GraphQL research to two successful actions", () => {
     expect(
       selectResearchFocus([
