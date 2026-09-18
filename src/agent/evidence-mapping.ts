@@ -49,6 +49,51 @@ function normalizeUrl(value: string): string {
   return url.toString();
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function contentSupportsField(
+  result: AppResearchResult,
+  field: ResearchField,
+  content: string,
+  sourceType: "official" | "third_party",
+): boolean {
+  if (!content) return true;
+
+  if (field === "accessModel") {
+    const accessPatterns: Record<AppResearchResult["accessModel"], RegExp> = {
+      self_serve_free: /\b(?:free (?:account|plan|workspace)|developer edition.{0,40}free|open[- ]source|self[- ]host)/i,
+      self_serve_trial: /\b(?:free )?trial\b/i,
+      self_serve_paid: /\b(?:paid (?:account|plan)|subscription required)\b/i,
+      admin_approval: /\b(?:tech(?:nical)? admin|administrator.{0,60}(?:approve|create|enable|grant|required))/i,
+      enterprise_only: /\b(?:enterprise.{0,60}(?:required|only|plan|edition)|(?:requires?|available).{0,60}enterprise)\b/i,
+      partnership_required: /\bpartner(?:ship)?.{0,40}(?:required|approval|program)\b/i,
+      contact_sales: /\bcontact (?:our )?sales\b/i,
+      unknown: /$a/,
+    };
+    return accessPatterns[result.accessModel].test(content);
+  }
+
+  if (field === "apiSurface.graphql" && result.apiSurface.graphql === false) {
+    return /\b(?:does not|doesn't|no longer) (?:offer|support|provide|have).{0,50}GraphQL|\bGraphQL.{0,50}(?:is not supported|is unavailable|isn't supported)\b/i.test(
+      content,
+    );
+  }
+
+  if (field === "mcp" && result.mcp.status === "available") {
+    const app = escapeRegExp(result.app);
+    const productServer = new RegExp(
+      `\\b${app}(?:'s)?\\s+(?:hosted\\s+)?MCP\\s+servers?\\b|\\bMCP\\s+servers?\\s+(?:provided\\s+by\\s+)?${app}\\b`,
+      "i",
+    );
+    return productServer.test(content) ||
+      (sourceType === "official" && /\bour MCP server\b/i.test(content));
+  }
+
+  return true;
+}
+
 export function applyFieldEvidence(
   result: AppResearchResult,
   fieldEvidence: FieldEvidence,
@@ -61,6 +106,9 @@ export function applyFieldEvidence(
       typeof source === "string" ? "" : source.content,
     ]),
   );
+  const evidenceByUrl = new Map(
+    result.evidence.map((item) => [normalizeUrl(item.url), item]),
+  );
 
   for (const [ledgerField, urls] of Object.entries(fieldEvidence) as Array<
     [keyof FieldEvidence, string[]]
@@ -69,6 +117,18 @@ export function applyFieldEvidence(
     for (const url of urls) {
       const normalized = normalizeUrl(url);
       if (!fetched.has(normalized)) continue;
+      const item = evidenceByUrl.get(normalized);
+      if (
+        item &&
+        !contentSupportsField(
+          result,
+          resultField,
+          fetched.get(normalized) ?? "",
+          item.sourceType,
+        )
+      ) {
+        continue;
+      }
       const supports = supportsByUrl.get(normalized) ?? new Set<ResearchField>();
       supports.add(resultField);
       supportsByUrl.set(normalized, supports);
@@ -100,7 +160,7 @@ export function applyFieldEvidence(
     }
     if (
       result.mcp.status === "available" &&
-      /\b(?:Model Context Protocol|MCP (?:server|support|integration))\b/i.test(text)
+      contentSupportsField(result, "mcp", text, item.sourceType)
     ) {
       supports.add("mcp");
     }
