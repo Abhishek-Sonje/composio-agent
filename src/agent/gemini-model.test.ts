@@ -35,6 +35,35 @@ describe("createGeminiResearchModel", () => {
     );
   });
 
+  it("defines access as credential availability rather than API endpoints", async () => {
+    const generate = vi.fn().mockResolvedValue(
+      JSON.stringify({
+        action: "search",
+        query: "Example developer signup credentials",
+        url: null,
+        purpose: "Verify how developers obtain credentials",
+        reason: null,
+      }),
+    );
+    const model = createGeminiResearchModel(gemini, generate);
+
+    await model.chooseAction({
+      target: { name: "Example" },
+      observations: [],
+      stepsUsed: 2,
+      maxSteps: 10,
+      researchFocus: "access",
+      preferredAction: "search",
+    });
+
+    expect(generate.mock.calls[0]?.[0].prompt).toContain(
+      "how a developer obtains credentials",
+    );
+    expect(generate.mock.calls[0]?.[0].prompt).toContain(
+      "Do not research API endpoints for this focus",
+    );
+  });
+
   it("rejects malformed JSON from Gemini", async () => {
     const model = createGeminiResearchModel(
       gemini,
