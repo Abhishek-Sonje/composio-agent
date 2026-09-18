@@ -129,7 +129,7 @@ Choose exactly one next action. Search for a specific unresolved question, fetch
       const focusDescriptions = {
         authentication: "which documented authentication method an integration uses",
         access:
-          "how a developer obtains credentials: self-serve signup, free or paid plan, administrator approval, enterprise gating, or self-hosting. Do not research API endpoints for this focus",
+          "how a developer obtains credentials: self-serve signup, free or paid plan, administrator approval, enterprise gating, or self-hosting. Fetch an official account, plan, signup, self-hosting, or administrator-access page that explicitly states the access condition. Token creation instructions alone do not establish the access model. Do not research API endpoints for this focus",
         rest: "whether an official usable REST API and endpoint documentation exist",
         mcp: "whether the product owner provides an official MCP server or service",
         graphql: "whether an official GraphQL API is documented",
