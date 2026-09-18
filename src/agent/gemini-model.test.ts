@@ -181,4 +181,17 @@ describe("withTransientModelRetry", () => {
     await expect(withTransientModelRetry(operation, sleep)).resolves.toBe("ok");
     expect(sleep).toHaveBeenCalledWith(2_250);
   });
+
+  it("honors provider retry windows longer than thirty seconds", async () => {
+    const operation = vi
+      .fn()
+      .mockRejectedValueOnce(
+        new Error('429 PerMinute RESOURCE_EXHAUSTED "retryDelay":"59s"'),
+      )
+      .mockResolvedValue("ok");
+    const sleep = vi.fn().mockResolvedValue(undefined);
+
+    await expect(withTransientModelRetry(operation, sleep)).resolves.toBe("ok");
+    expect(sleep).toHaveBeenCalledWith(59_250);
+  });
 });
