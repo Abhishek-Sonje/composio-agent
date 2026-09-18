@@ -380,4 +380,44 @@ describe("applyFieldEvidence", () => {
 
     expect(mapped.evidence.flatMap((item) => item.supports)).toContain("mcp");
   });
+
+  it("rejects product MCP absence inferred from official MCP client documentation", () => {
+    const negativeMcpResult = {
+      ...result,
+      mcp: { status: "not_found" as const },
+    };
+    const mapped = applyFieldEvidence(
+      negativeMcpResult,
+      ledger({ mcp: [restUrl] }),
+      [{
+        url: restUrl,
+        content: "Connect to external MCP servers and use MCP client tools in workflows.",
+      }],
+    );
+
+    expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain("mcp");
+  });
+
+  it("rejects a negative product MCP claim from a third-party source", () => {
+    const negativeMcpResult = {
+      ...result,
+      mcp: { status: "not_found" as const },
+      evidence: [{
+        title: "Community MCP client",
+        url: restUrl,
+        sourceType: "third_party" as const,
+        supports: ["mcp" as const],
+      }],
+    };
+    const mapped = applyFieldEvidence(
+      negativeMcpResult,
+      ledger({ mcp: [restUrl] }),
+      [{
+        url: restUrl,
+        content: "No official MCP server was found by this community project.",
+      }],
+    );
+
+    expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain("mcp");
+  });
 });
