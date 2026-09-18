@@ -15,7 +15,9 @@
     "research:all": "npm run build --silent && node --env-file-if-exists=.env dist/batch.js",
     "analyze": "npm run build --silent && node dist/analyze.js",
     "typecheck": "npm run check",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "case-study:build": "node scripts/build-case-study.mjs",
+    "case-study:dev": "node scripts/serve-case-study.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

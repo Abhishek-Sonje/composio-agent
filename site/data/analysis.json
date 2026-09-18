@@ -1,0 +1,1038 @@
+{
+  "generatedAt": "2026-09-18T18:52:03.098Z",
+  "source": {
+    "file": "results/research-dataset.json",
+    "datasetGeneratedAt": "2026-09-18T13:06:12.642Z",
+    "appCount": 100
+  },
+  "overall": {
+    "totalApps": 100,
+    "authentication": {
+      "normalizedMethodFamilies": {
+        "OAuth": 70,
+        "Bearer/access token": 43,
+        "API key/token": 39,
+        "Basic auth": 12,
+        "Service account/client credentials": 7,
+        "Other": 2,
+        "Bot token": 2,
+        "Personal access token": 13
+      },
+      "appsWithKnownAuth": 96,
+      "denominator": "method family counts are multi-label; percentOfKnown uses apps with non-empty authMethods"
+    },
+    "accessModel": {
+      "self_serve_free": 18,
+      "unknown": 76,
+      "self_serve_trial": 4,
+      "enterprise_only": 2
+    },
+    "apiSurface": {
+      "rest": {
+        "true": 87,
+        "unknown": 13
+      },
+      "graphql": {
+        "true": 18,
+        "unknown": 82
+      }
+    },
+    "mcp": {
+      "available": 51,
+      "unknown": 43,
+      "not_found": 6
+    },
+    "buildability": {
+      "buildable": 21,
+      "unknown": 75,
+      "partially_buildable": 3,
+      "blocked": 1
+    },
+    "blocker": {
+      "none_or_not_claimed": 95,
+      "approval_or_review": 1,
+      "insufficient_documentation_or_auth_clarity": 1,
+      "no_usable_public_api": 1,
+      "enterprise_access": 2
+    },
+    "confidence": {
+      "medium": 100
+    },
+    "unknownFields": {
+      "actualUnresolved": {
+        "accessModel": 76,
+        "buildability": 75,
+        "apiSurface.graphql": 82,
+        "mcp": 43,
+        "apiSurface.rest": 13,
+        "authMethods": 4
+      },
+      "declared": {
+        "accessModel": 76,
+        "buildability": 75,
+        "category": 75,
+        "description": 52,
+        "apiSurface.graphql": 80,
+        "apiSurface.other": 9,
+        "mcp": 43,
+        "apiSurface.rest": 13,
+        "authMethods": 1
+      }
+    },
+    "metrics": {
+      "oauth": {
+        "count": 70,
+        "total": 100,
+        "known": 96,
+        "percentOfTotal": 70,
+        "percentOfKnown": 72.9
+      },
+      "selfServe": {
+        "count": 22,
+        "total": 100,
+        "known": 100,
+        "percentOfTotal": 22,
+        "percentOfKnown": 22
+      },
+      "restAvailable": {
+        "count": 87,
+        "total": 100,
+        "known": 87,
+        "percentOfTotal": 87,
+        "percentOfKnown": 100
+      },
+      "graphqlAvailable": {
+        "count": 18,
+        "total": 100,
+        "known": 18,
+        "percentOfTotal": 18,
+        "percentOfKnown": 100
+      },
+      "mcpAvailable": {
+        "count": 51,
+        "total": 100,
+        "known": 57,
+        "percentOfTotal": 51,
+        "percentOfKnown": 89.5
+      },
+      "buildable": {
+        "count": 21,
+        "total": 100,
+        "known": 25,
+        "percentOfTotal": 21,
+        "percentOfKnown": 84
+      }
+    }
+  },
+  "byCategory": {
+    "CRM and Sales": {
+      "total": 10,
+      "accessModel": {
+        "self_serve_free": 4,
+        "unknown": 6
+      },
+      "authentication": {
+        "OAuth": 10,
+        "Bearer/access token": 1,
+        "API key/token": 6,
+        "Basic auth": 1
+      },
+      "mcp": {
+        "available": 6,
+        "unknown": 4
+      },
+      "buildability": {
+        "buildable": 3,
+        "unknown": 7
+      },
+      "blocker": {
+        "none_or_not_claimed": 10
+      },
+      "unknownFields": {
+        "accessModel": 6,
+        "buildability": 7,
+        "apiSurface.graphql": 5,
+        "mcp": 4
+      },
+      "metrics": {
+        "oauth": {
+          "count": 10,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 100,
+          "percentOfKnown": 100
+        },
+        "selfServe": {
+          "count": 4,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 40,
+          "percentOfKnown": 40
+        },
+        "restAvailable": {
+          "count": 10,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 100,
+          "percentOfKnown": 100
+        },
+        "graphqlAvailable": {
+          "count": 5,
+          "total": 10,
+          "known": 5,
+          "percentOfTotal": 50,
+          "percentOfKnown": 100
+        },
+        "mcpAvailable": {
+          "count": 6,
+          "total": 10,
+          "known": 6,
+          "percentOfTotal": 60,
+          "percentOfKnown": 100
+        },
+        "buildable": {
+          "count": 3,
+          "total": 10,
+          "known": 3,
+          "percentOfTotal": 30,
+          "percentOfKnown": 100
+        }
+      }
+    },
+    "Support and Helpdesk": {
+      "total": 10,
+      "accessModel": {
+        "self_serve_trial": 2,
+        "self_serve_free": 1,
+        "unknown": 7
+      },
+      "authentication": {
+        "OAuth": 8,
+        "API key/token": 4,
+        "Basic auth": 4,
+        "Bearer/access token": 4,
+        "Service account/client credentials": 1
+      },
+      "mcp": {
+        "unknown": 3,
+        "available": 7
+      },
+      "buildability": {
+        "buildable": 3,
+        "unknown": 7
+      },
+      "blocker": {
+        "none_or_not_claimed": 10
+      },
+      "unknownFields": {
+        "apiSurface.rest": 2,
+        "mcp": 3,
+        "apiSurface.graphql": 8,
+        "accessModel": 7,
+        "buildability": 7
+      },
+      "metrics": {
+        "oauth": {
+          "count": 8,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 80,
+          "percentOfKnown": 80
+        },
+        "selfServe": {
+          "count": 3,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 30,
+          "percentOfKnown": 30
+        },
+        "restAvailable": {
+          "count": 8,
+          "total": 10,
+          "known": 8,
+          "percentOfTotal": 80,
+          "percentOfKnown": 100
+        },
+        "graphqlAvailable": {
+          "count": 2,
+          "total": 10,
+          "known": 2,
+          "percentOfTotal": 20,
+          "percentOfKnown": 100
+        },
+        "mcpAvailable": {
+          "count": 7,
+          "total": 10,
+          "known": 7,
+          "percentOfTotal": 70,
+          "percentOfKnown": 100
+        },
+        "buildable": {
+          "count": 3,
+          "total": 10,
+          "known": 3,
+          "percentOfTotal": 30,
+          "percentOfKnown": 100
+        }
+      }
+    },
+    "Communications and Messaging": {
+      "total": 10,
+      "accessModel": {
+        "self_serve_free": 1,
+        "unknown": 9
+      },
+      "authentication": {
+        "OAuth": 7,
+        "Basic auth": 3,
+        "Service account/client credentials": 1,
+        "Other": 1,
+        "API key/token": 2,
+        "Bearer/access token": 3,
+        "Bot token": 2
+      },
+      "mcp": {
+        "available": 4,
+        "unknown": 6
+      },
+      "buildability": {
+        "buildable": 1,
+        "unknown": 9
+      },
+      "blocker": {
+        "none_or_not_claimed": 10
+      },
+      "unknownFields": {
+        "apiSurface.rest": 1,
+        "apiSurface.graphql": 9,
+        "accessModel": 9,
+        "buildability": 9,
+        "mcp": 6
+      },
+      "metrics": {
+        "oauth": {
+          "count": 7,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 70,
+          "percentOfKnown": 70
+        },
+        "selfServe": {
+          "count": 1,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 10,
+          "percentOfKnown": 10
+        },
+        "restAvailable": {
+          "count": 9,
+          "total": 10,
+          "known": 9,
+          "percentOfTotal": 90,
+          "percentOfKnown": 100
+        },
+        "graphqlAvailable": {
+          "count": 1,
+          "total": 10,
+          "known": 1,
+          "percentOfTotal": 10,
+          "percentOfKnown": 100
+        },
+        "mcpAvailable": {
+          "count": 4,
+          "total": 10,
+          "known": 4,
+          "percentOfTotal": 40,
+          "percentOfKnown": 100
+        },
+        "buildable": {
+          "count": 1,
+          "total": 10,
+          "known": 1,
+          "percentOfTotal": 10,
+          "percentOfKnown": 100
+        }
+      }
+    },
+    "Marketing, Ads, Email and Social": {
+      "total": 10,
+      "accessModel": {
+        "unknown": 7,
+        "self_serve_free": 3
+      },
+      "authentication": {
+        "OAuth": 8,
+        "Service account/client credentials": 1,
+        "Bearer/access token": 1,
+        "API key/token": 3,
+        "Other": 1
+      },
+      "mcp": {
+        "unknown": 8,
+        "available": 1,
+        "not_found": 1
+      },
+      "buildability": {
+        "unknown": 6,
+        "partially_buildable": 1,
+        "buildable": 3
+      },
+      "blocker": {
+        "none_or_not_claimed": 9,
+        "approval_or_review": 1
+      },
+      "unknownFields": {
+        "accessModel": 7,
+        "apiSurface.graphql": 10,
+        "mcp": 8,
+        "buildability": 6,
+        "apiSurface.rest": 1
+      },
+      "metrics": {
+        "oauth": {
+          "count": 8,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 80,
+          "percentOfKnown": 80
+        },
+        "selfServe": {
+          "count": 3,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 30,
+          "percentOfKnown": 30
+        },
+        "restAvailable": {
+          "count": 9,
+          "total": 10,
+          "known": 9,
+          "percentOfTotal": 90,
+          "percentOfKnown": 100
+        },
+        "graphqlAvailable": {
+          "count": 0,
+          "total": 10,
+          "known": 0,
+          "percentOfTotal": 0,
+          "percentOfKnown": null
+        },
+        "mcpAvailable": {
+          "count": 1,
+          "total": 10,
+          "known": 2,
+          "percentOfTotal": 10,
+          "percentOfKnown": 50
+        },
+        "buildable": {
+          "count": 3,
+          "total": 10,
+          "known": 4,
+          "percentOfTotal": 30,
+          "percentOfKnown": 75
+        }
+      }
+    },
+    "Ecommerce": {
+      "total": 10,
+      "accessModel": {
+        "unknown": 10
+      },
+      "authentication": {
+        "OAuth": 8,
+        "Bearer/access token": 5,
+        "API key/token": 3
+      },
+      "mcp": {
+        "unknown": 7,
+        "available": 1,
+        "not_found": 2
+      },
+      "buildability": {
+        "unknown": 9,
+        "partially_buildable": 1
+      },
+      "blocker": {
+        "none_or_not_claimed": 9,
+        "insufficient_documentation_or_auth_clarity": 1
+      },
+      "unknownFields": {
+        "accessModel": 10,
+        "mcp": 7,
+        "buildability": 9,
+        "apiSurface.graphql": 6,
+        "authMethods": 1
+      },
+      "metrics": {
+        "oauth": {
+          "count": 8,
+          "total": 10,
+          "known": 9,
+          "percentOfTotal": 80,
+          "percentOfKnown": 88.9
+        },
+        "selfServe": {
+          "count": 0,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 0,
+          "percentOfKnown": 0
+        },
+        "restAvailable": {
+          "count": 10,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 100,
+          "percentOfKnown": 100
+        },
+        "graphqlAvailable": {
+          "count": 4,
+          "total": 10,
+          "known": 4,
+          "percentOfTotal": 40,
+          "percentOfKnown": 100
+        },
+        "mcpAvailable": {
+          "count": 1,
+          "total": 10,
+          "known": 3,
+          "percentOfTotal": 10,
+          "percentOfKnown": 33.3
+        },
+        "buildable": {
+          "count": 0,
+          "total": 10,
+          "known": 1,
+          "percentOfTotal": 0,
+          "percentOfKnown": 0
+        }
+      }
+    },
+    "Data, SEO and Scraping": {
+      "total": 10,
+      "accessModel": {
+        "unknown": 7,
+        "self_serve_trial": 1,
+        "self_serve_free": 2
+      },
+      "authentication": {
+        "Basic auth": 1,
+        "OAuth": 2,
+        "API key/token": 6,
+        "Bearer/access token": 3
+      },
+      "mcp": {
+        "available": 7,
+        "unknown": 3
+      },
+      "buildability": {
+        "unknown": 6,
+        "buildable": 3,
+        "blocked": 1
+      },
+      "blocker": {
+        "none_or_not_claimed": 9,
+        "no_usable_public_api": 1
+      },
+      "unknownFields": {
+        "accessModel": 7,
+        "apiSurface.graphql": 10,
+        "buildability": 6,
+        "apiSurface.rest": 2,
+        "authMethods": 1,
+        "mcp": 3
+      },
+      "metrics": {
+        "oauth": {
+          "count": 2,
+          "total": 10,
+          "known": 9,
+          "percentOfTotal": 20,
+          "percentOfKnown": 22.2
+        },
+        "selfServe": {
+          "count": 3,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 30,
+          "percentOfKnown": 30
+        },
+        "restAvailable": {
+          "count": 8,
+          "total": 10,
+          "known": 8,
+          "percentOfTotal": 80,
+          "percentOfKnown": 100
+        },
+        "graphqlAvailable": {
+          "count": 0,
+          "total": 10,
+          "known": 0,
+          "percentOfTotal": 0,
+          "percentOfKnown": null
+        },
+        "mcpAvailable": {
+          "count": 7,
+          "total": 10,
+          "known": 7,
+          "percentOfTotal": 70,
+          "percentOfKnown": 100
+        },
+        "buildable": {
+          "count": 3,
+          "total": 10,
+          "known": 4,
+          "percentOfTotal": 30,
+          "percentOfKnown": 75
+        }
+      }
+    },
+    "Developer, Infra and Data platforms": {
+      "total": 10,
+      "accessModel": {
+        "self_serve_free": 2,
+        "unknown": 8
+      },
+      "authentication": {
+        "Bearer/access token": 7,
+        "Personal access token": 4,
+        "OAuth": 6,
+        "API key/token": 3,
+        "Basic auth": 1,
+        "Service account/client credentials": 2
+      },
+      "mcp": {
+        "available": 7,
+        "not_found": 2,
+        "unknown": 1
+      },
+      "buildability": {
+        "buildable": 2,
+        "unknown": 8
+      },
+      "blocker": {
+        "none_or_not_claimed": 10
+      },
+      "unknownFields": {
+        "apiSurface.graphql": 7,
+        "accessModel": 8,
+        "buildability": 8,
+        "mcp": 1
+      },
+      "metrics": {
+        "oauth": {
+          "count": 6,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 60,
+          "percentOfKnown": 60
+        },
+        "selfServe": {
+          "count": 2,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 20,
+          "percentOfKnown": 20
+        },
+        "restAvailable": {
+          "count": 10,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 100,
+          "percentOfKnown": 100
+        },
+        "graphqlAvailable": {
+          "count": 3,
+          "total": 10,
+          "known": 3,
+          "percentOfTotal": 30,
+          "percentOfKnown": 100
+        },
+        "mcpAvailable": {
+          "count": 7,
+          "total": 10,
+          "known": 9,
+          "percentOfTotal": 70,
+          "percentOfKnown": 77.8
+        },
+        "buildable": {
+          "count": 2,
+          "total": 10,
+          "known": 2,
+          "percentOfTotal": 20,
+          "percentOfKnown": 100
+        }
+      }
+    },
+    "Productivity and Project Management": {
+      "total": 10,
+      "accessModel": {
+        "unknown": 8,
+        "self_serve_free": 1,
+        "self_serve_trial": 1
+      },
+      "authentication": {
+        "OAuth": 10,
+        "Bearer/access token": 7,
+        "Personal access token": 7,
+        "API key/token": 4,
+        "Basic auth": 1,
+        "Service account/client credentials": 1
+      },
+      "mcp": {
+        "available": 6,
+        "unknown": 4
+      },
+      "buildability": {
+        "unknown": 8,
+        "buildable": 2
+      },
+      "blocker": {
+        "none_or_not_claimed": 10
+      },
+      "unknownFields": {
+        "accessModel": 8,
+        "apiSurface.graphql": 7,
+        "buildability": 8,
+        "mcp": 4,
+        "apiSurface.rest": 3
+      },
+      "metrics": {
+        "oauth": {
+          "count": 10,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 100,
+          "percentOfKnown": 100
+        },
+        "selfServe": {
+          "count": 2,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 20,
+          "percentOfKnown": 20
+        },
+        "restAvailable": {
+          "count": 7,
+          "total": 10,
+          "known": 7,
+          "percentOfTotal": 70,
+          "percentOfKnown": 100
+        },
+        "graphqlAvailable": {
+          "count": 3,
+          "total": 10,
+          "known": 3,
+          "percentOfTotal": 30,
+          "percentOfKnown": 100
+        },
+        "mcpAvailable": {
+          "count": 6,
+          "total": 10,
+          "known": 6,
+          "percentOfTotal": 60,
+          "percentOfKnown": 100
+        },
+        "buildable": {
+          "count": 2,
+          "total": 10,
+          "known": 2,
+          "percentOfTotal": 20,
+          "percentOfKnown": 100
+        }
+      }
+    },
+    "Finance and Fintech": {
+      "total": 10,
+      "accessModel": {
+        "unknown": 8,
+        "self_serve_free": 2
+      },
+      "authentication": {
+        "OAuth": 6,
+        "API key/token": 3,
+        "Bearer/access token": 5,
+        "Basic auth": 1
+      },
+      "mcp": {
+        "available": 6,
+        "unknown": 3,
+        "not_found": 1
+      },
+      "buildability": {
+        "unknown": 7,
+        "buildable": 2,
+        "partially_buildable": 1
+      },
+      "blocker": {
+        "none_or_not_claimed": 9,
+        "enterprise_access": 1
+      },
+      "unknownFields": {
+        "accessModel": 8,
+        "apiSurface.rest": 1,
+        "apiSurface.graphql": 10,
+        "buildability": 7,
+        "mcp": 3
+      },
+      "metrics": {
+        "oauth": {
+          "count": 6,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 60,
+          "percentOfKnown": 60
+        },
+        "selfServe": {
+          "count": 2,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 20,
+          "percentOfKnown": 20
+        },
+        "restAvailable": {
+          "count": 9,
+          "total": 10,
+          "known": 9,
+          "percentOfTotal": 90,
+          "percentOfKnown": 100
+        },
+        "graphqlAvailable": {
+          "count": 0,
+          "total": 10,
+          "known": 0,
+          "percentOfTotal": 0,
+          "percentOfKnown": null
+        },
+        "mcpAvailable": {
+          "count": 6,
+          "total": 10,
+          "known": 7,
+          "percentOfTotal": 60,
+          "percentOfKnown": 85.7
+        },
+        "buildable": {
+          "count": 2,
+          "total": 10,
+          "known": 3,
+          "percentOfTotal": 20,
+          "percentOfKnown": 66.7
+        }
+      }
+    },
+    "AI, Research and Media-native": {
+      "total": 10,
+      "accessModel": {
+        "enterprise_only": 2,
+        "unknown": 6,
+        "self_serve_free": 2
+      },
+      "authentication": {
+        "Bearer/access token": 7,
+        "OAuth": 5,
+        "API key/token": 5,
+        "Personal access token": 2,
+        "Service account/client credentials": 1
+      },
+      "mcp": {
+        "unknown": 4,
+        "available": 6
+      },
+      "buildability": {
+        "unknown": 8,
+        "buildable": 2
+      },
+      "blocker": {
+        "none_or_not_claimed": 9,
+        "enterprise_access": 1
+      },
+      "unknownFields": {
+        "authMethods": 2,
+        "apiSurface.rest": 3,
+        "apiSurface.graphql": 10,
+        "mcp": 4,
+        "buildability": 8,
+        "accessModel": 6
+      },
+      "metrics": {
+        "oauth": {
+          "count": 5,
+          "total": 10,
+          "known": 8,
+          "percentOfTotal": 50,
+          "percentOfKnown": 62.5
+        },
+        "selfServe": {
+          "count": 2,
+          "total": 10,
+          "known": 10,
+          "percentOfTotal": 20,
+          "percentOfKnown": 20
+        },
+        "restAvailable": {
+          "count": 7,
+          "total": 10,
+          "known": 7,
+          "percentOfTotal": 70,
+          "percentOfKnown": 100
+        },
+        "graphqlAvailable": {
+          "count": 0,
+          "total": 10,
+          "known": 0,
+          "percentOfTotal": 0,
+          "percentOfKnown": null
+        },
+        "mcpAvailable": {
+          "count": 6,
+          "total": 10,
+          "known": 6,
+          "percentOfTotal": 60,
+          "percentOfKnown": 100
+        },
+        "buildable": {
+          "count": 2,
+          "total": 10,
+          "known": 2,
+          "percentOfTotal": 20,
+          "percentOfKnown": 100
+        }
+      }
+    }
+  },
+  "opportunityBuckets": {
+    "easy_integration_candidates": {
+      "count": 21,
+      "percentOfTotal": 21,
+      "apps": [
+        "Salesforce",
+        "Attio",
+        "Zoho CRM",
+        "Zendesk",
+        "Intercom",
+        "LiveAgent",
+        "Slack",
+        "Mailchimp",
+        "systeme.io",
+        "Threads (Meta)",
+        "SE Ranking",
+        "MrScraper",
+        "Apify",
+        "GitHub",
+        "Supabase",
+        "Airtable",
+        "Harvest",
+        "Paygent Connect",
+        "iPayX",
+        "Consensus",
+        "Devin"
+      ],
+      "rule": "authMethods known, usable API, self-serve access, and buildability=buildable"
+    },
+    "needs_outreach_gated": {
+      "count": 1,
+      "percentOfTotal": 1,
+      "apps": [
+        "NotebookLM Enterprise"
+      ],
+      "rule": "usable API and gated accessModel"
+    },
+    "needs_further_research": {
+      "count": 73,
+      "percentOfTotal": 73,
+      "apps": [
+        "HubSpot",
+        "Pipedrive",
+        "Twenty",
+        "Podio",
+        "Close",
+        "Copper",
+        "DealCloud",
+        "Freshdesk",
+        "Front",
+        "Pylon",
+        "Plain",
+        "Help Scout",
+        "Gorgias",
+        "Gladly",
+        "Twilio",
+        "Zoho Cliq",
+        "Lark (Larksuite)",
+        "Pumble",
+        "Discord",
+        "Telegram",
+        "WhatsApp Business",
+        "Aircall",
+        "Vonage",
+        "Google Ads",
+        "Meta Ads",
+        "GoHighLevel",
+        "Klaviyo",
+        "Pinterest",
+        "SendGrid",
+        "Shopify",
+        "WooCommerce",
+        "BigCommerce",
+        "Salesforce Commerce Cloud",
+        "Magento (Adobe Commerce)",
+        "Squarespace",
+        "Gumroad",
+        "Amazon Selling Partner",
+        "Fanbasis",
+        "DataForSEO",
+        "Ahrefs",
+        "Firecrawl",
+        "Bright Data",
+        "Waterfall.io",
+        "Clay",
+        "Vercel",
+        "Netlify",
+        "Cloudflare",
+        "Neo4j",
+        "Snowflake",
+        "MongoDB Atlas",
+        "Datadog",
+        "Sentry",
+        "Notion",
+        "Linear",
+        "Jira",
+        "Asana",
+        "Monday.com",
+        "ClickUp",
+        "Coda",
+        "Smartsheet",
+        "Stripe",
+        "Plaid",
+        "Binance",
+        "QuickBooks",
+        "Xero",
+        "Brex",
+        "Ramp",
+        "Fathom",
+        "Reducto",
+        "Higgsfield",
+        "Mermaid CLI",
+        "YouTube Transcript",
+        "Grain"
+      ],
+      "rule": "not matched earlier and an important feasibility field is unresolved"
+    },
+    "blocked": {
+      "count": 5,
+      "percentOfTotal": 5,
+      "apps": [
+        "LinkedIn Ads",
+        "Ecwid",
+        "Sherlock",
+        "PitchBook",
+        "Otter AI"
+      ],
+      "rule": "buildability=blocked or a non-null blocker is recorded"
+    }
+  },
+  "reconciliation": {
+    "categoryTotals": 100,
+    "bucketAssigned": 100,
+    "bucketUnassigned": 0
+  }
+}
