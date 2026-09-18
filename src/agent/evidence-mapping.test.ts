@@ -119,14 +119,21 @@ describe("applyFieldEvidence", () => {
     );
   });
 
-  it("ignores ledger URLs that are absent from the evidence list", () => {
+  it("recovers a fetched ledger URL that synthesis omitted", () => {
+    const unseenUrl = "https://unseen.example.com/rest";
     const mapped = applyFieldEvidence(
       result,
-      ledger({ apiSurfaceRest: ["https://unseen.example.com/rest"] }),
-      [restUrl],
+      ledger({ apiSurfaceRest: [unseenUrl] }),
+      [{ url: unseenUrl, content: "Official REST API documentation", title: "REST API" }],
     );
 
-    expect(mapped.evidence).toEqual([]);
+    expect(mapped.evidence).toEqual([
+      expect.objectContaining({
+        url: unseenUrl,
+        sourceType: "third_party",
+        supports: ["apiSurface.rest"],
+      }),
+    ]);
   });
 
   it("does not accept a search-only URL that was never fetched", () => {
