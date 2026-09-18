@@ -192,6 +192,29 @@ describe("applyFieldEvidence", () => {
     expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain("mcp");
   });
 
+  it("does not treat an integration platform page as product-owned MCP", () => {
+    const mcpResult = {
+      ...result,
+      mcp: { status: "available" as const },
+      evidence: [{
+        title: "Example MCP Server - MCP AI | Integration Platform",
+        url: "https://integrations.test/mcp/example",
+        sourceType: "official" as const,
+        supports: ["mcp" as const],
+      }],
+    };
+    const mapped = applyFieldEvidence(
+      mcpResult,
+      ledger({ mcp: ["https://integrations.test/mcp/example"] }),
+      [{
+        url: "https://integrations.test/mcp/example",
+        content: "Connect to the Example MCP server through our integration platform.",
+      }],
+    );
+
+    expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain("mcp");
+  });
+
   it("accepts an official vendor page naming the product MCP service", () => {
     const mcpResult = { ...result, mcp: { status: "available" as const } };
     const mapped = applyFieldEvidence(
