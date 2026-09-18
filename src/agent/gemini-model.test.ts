@@ -62,6 +62,9 @@ describe("createGeminiResearchModel", () => {
     expect(generate.mock.calls[0]?.[0].prompt).toContain(
       "Do not research API endpoints for this focus",
     );
+    expect(generate.mock.calls[0]?.[0].prompt).toContain(
+      "Token creation instructions alone do not establish the access model",
+    );
   });
 
   it("rejects malformed JSON from Gemini", async () => {
