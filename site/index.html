@@ -1,127 +1,589 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="An evidence-backed study of integration feasibility across 100 applications for Composio.">
-  <title>Composio Integration Research — Case Study</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
-</head>
-<body>
-  <a class="skip" href="#main">Skip to content</a>
-  <header class="topbar wrap">
-    <div><strong>Composio Integration Research</strong><span>AI Product Ops take-home</span></div>
-    <nav aria-label="Primary"><a href="#findings">Findings</a><a href="#verification">Verification</a><a href="#dataset">Dataset</a><a href="https://github.com/Abhishek-Sonje/composio-agent" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta
+      name="description"
+      content="An evidence-backed study of integration feasibility across 100 applications for Composio."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Composio Integration Research: Case Study"
+    />
+    <meta
+      property="og:description"
+      content="100 apps, one research agent. What can actually become an agent tool today?"
+    />
+    <meta name="twitter:card" content="summary" />
+    <title>Composio Integration Research: Case Study</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0a0a'/%3E%3Crect x='7' y='7' width='7' height='7' rx='1.5' fill='%234ade80'/%3E%3Crect x='18' y='7' width='7' height='7' rx='1.5' fill='%23333'/%3E%3Crect x='7' y='18' width='7' height='7' rx='1.5' fill='%23333'/%3E%3Crect x='18' y='18' width='7' height='7' rx='1.5' fill='%23333'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
 
-  <main id="main">
-    <section class="hero wrap ruled">
-      <p class="eyebrow">Evidence-backed integration research · 2026</p>
-      <h1>100 apps. One research agent.<br><em>What can actually become an agent tool today?</em></h1>
-      <p class="lede">I built a research system to evaluate authentication, developer access, API surface, MCP support, and integration feasibility—then measured where it failed, rejected an optimization that made coverage worse, and kept the safety fixes.</p>
-      <div class="hero-metrics" aria-label="Summary metrics">
+    <header class="topbar line">
+      <div class="frame bar">
+        <a class="brand" href="#top"
+          ><strong>Composio integration research</strong
+          ><span>AI Product Ops take-home</span></a
+        >
+        <nav aria-label="Primary">
+          <a href="#findings">Findings</a>
+          <a href="#verification">Verification</a>
+          <a href="#dataset">Dataset</a>
+          <a
+            href="https://github.com/Abhishek-Sonje/composio-agent"
+            target="_blank"
+            rel="noreferrer"
+            >GitHub ↗</a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="frame">
+      <section id="top" class="hero block line">
+        <p class="kicker">Evidence-backed integration research, 2026</p>
+        <h1>
+          100 apps. One research agent.<br /><span
+            >What can actually become an agent tool today?</span
+          >
+        </h1>
+        <p class="lede">
+          I built a research system to evaluate authentication, developer
+          access, API surface, MCP support, and integration feasibility. Then I
+          measured where it failed, rejected an optimization that made coverage
+          worse, and kept the safety fixes.
+        </p>
+      </section>
+
+      <div class="metrics line" aria-label="Summary metrics">
         <div><b>100/100</b><span>apps completed</span></div>
         <div><b>87</b><span>confirmed REST</span></div>
         <div><b>51</b><span>confirmed MCP</span></div>
         <div><b>21</b><span>evidence-supported easy candidates</span></div>
       </div>
-      <p class="caveat"><strong>Confirmed means evidenced.</strong> Every remainder may include unresolved values; unknown never means “does not exist.”</p>
-    </section>
 
-    <section id="findings" class="section wrap">
-      <div class="section-head"><p class="eyebrow">01 · Findings</p><h2>What the evidence established</h2><p>Counts below use all 100 apps. Unknowns stay in the denominator and are never converted to negatives.</p></div>
-      <div class="finding-list">
-        <article><b>70</b><div><h3>confirmed OAuth</h3><p>OAuth appeared in 70 apps; authentication was known for 96.</p></div></article>
-        <article><b>87</b><div><h3>confirmed REST APIs</h3><p>REST was supported by evidence for 87 apps. The other 13 remain unknown.</p></div></article>
-        <article><b>51</b><div><h3>confirmed MCP availability</h3><p>51 available, 6 explicitly not found, and 43 unresolved.</p></div></article>
-        <article><b>22</b><div><h3>confirmed self-serve access paths</h3><p>Access remained unknown for 76 apps—the largest operational research gap.</p></div></article>
+      <p class="note block line">
+        <strong>Confirmed means evidenced.</strong> Anything not confirmed is
+        either explicitly negative or unresolved, and unknown never means “does
+        not exist.”
+      </p>
+
+      <section id="coverage" class="block line">
+        <header class="head">
+          <h2>Evidence coverage</h2>
+          <p>Fields resolved with sufficient evidence, out of 100 apps.</p>
+        </header>
+        <figure class="fig">
+          <ul class="coverage">
+            <li style="--v: 96">
+              <span class="c-label">Authentication</span
+              ><span class="c-bar" role="img" aria-label="96 of 100 resolved"
+                ><i></i></span
+              ><span class="c-value"><b>96</b> / 100 resolved</span>
+            </li>
+            <li style="--v: 87">
+              <span class="c-label">REST API</span
+              ><span class="c-bar" role="img" aria-label="87 of 100 confirmed"
+                ><i></i></span
+              ><span class="c-value"><b>87</b> / 100 confirmed</span>
+            </li>
+            <li style="--v: 57">
+              <span class="c-label">MCP</span
+              ><span class="c-bar" role="img" aria-label="57 of 100 resolved"
+                ><i></i></span
+              ><span class="c-value"><b>57</b> / 100 resolved</span>
+            </li>
+            <li class="is-gap" style="--v: 24">
+              <span class="c-label">Access model</span
+              ><span class="c-bar" role="img" aria-label="24 of 100 resolved"
+                ><i></i></span
+              ><span class="c-value"><b>24</b> / 100 resolved</span>
+            </li>
+            <li class="is-gap" style="--v: 25">
+              <span class="c-label">Buildability</span
+              ><span class="c-bar" role="img" aria-label="25 of 100 resolved"
+                ><i></i></span
+              ><span class="c-value"><b>25</b> / 100 resolved</span>
+            </li>
+          </ul>
+          <figcaption>
+            <em>Fig. 1.</em> Hatched area is unresolved, not negative. MCP
+            counts 51 available and 6 explicitly not found.
+          </figcaption>
+        </figure>
+        <div class="lead-block">
+          <p class="lead-line">
+            The bottleneck wasn’t API discovery. It was proving developer
+            access.
+          </p>
+          <p>
+            Authentication and API availability were usually discoverable, but
+            credential/access requirements were often unclear. Because
+            buildability requires supported auth + access + API evidence, many
+            final verdicts remained unresolved rather than guessed.
+          </p>
+        </div>
+      </section>
+
+      <section id="verdicts" class="block line">
+        <header class="head head-sub">
+          <h2>Final feasibility verdicts</h2>
+          <p>
+            Deterministic workflow buckets, based only on supported fields.
+            Select a row to filter the dataset.
+          </p>
+        </header>
+        <div class="rows">
+          <button
+            class="bucket t-easy"
+            data-bucket-jump="easy_integration_candidates"
+          >
+            <b>21</b><span>Evidence-supported integration ready</span
+            ><small>Known auth, usable API, self-serve access, buildable</small>
+          </button>
+          <button
+            class="bucket t-gated"
+            data-bucket-jump="needs_outreach_gated"
+          >
+            <b>1</b><span>Gated / outreach required</span
+            ><small>Usable API with documented gated access</small>
+          </button>
+          <button class="bucket t-blocked" data-bucket-jump="blocked">
+            <b>5</b><span>Evidence-backed blockers</span
+            ><small>Blocked buildability or a recorded material blocker</small>
+          </button>
+          <button
+            class="bucket t-research"
+            data-bucket-jump="needs_further_research"
+          >
+            <b>73</b><span>Verdict unresolved</span
+            ><small>An important feasibility field remains unresolved</small>
+          </button>
+        </div>
+        <p class="verdict-note">
+          <code>Verdict unresolved</code> does not mean the app lacks an
+          integration path. It means at least one required feasibility field
+          could not be established with sufficient evidence.
+        </p>
+      </section>
+
+      <div class="sep line" aria-hidden="true"></div>
+
+      <section id="findings" class="block line">
+        <header class="head">
+          <h2>What the evidence established</h2>
+          <p>
+            Counts use all 100 apps. Unknowns stay in the denominator and are
+            never converted to negatives.
+          </p>
+        </header>
+        <div class="rows">
+          <article class="stat-row">
+            <b>70</b>
+            <div>
+              <h3>Confirmed OAuth</h3>
+              <p>OAuth appeared in 70 apps; authentication was known for 96.</p>
+            </div>
+          </article>
+          <article class="stat-row">
+            <b>87</b>
+            <div>
+              <h3>Confirmed REST APIs</h3>
+              <p>
+                REST was supported by evidence for 87 apps. The other 13 remain
+                unknown.
+              </p>
+            </div>
+          </article>
+          <article class="stat-row">
+            <b>51</b>
+            <div>
+              <h3>Confirmed MCP availability</h3>
+              <p>51 available, 6 explicitly not found, and 43 unresolved.</p>
+            </div>
+          </article>
+          <article class="stat-row">
+            <b>22</b>
+            <div>
+              <h3>Confirmed self-serve access paths</h3>
+              <p>
+                Access remained unknown for 76 apps, the largest operational
+                research gap.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- <section id="opportunity" class="block line">
+      <header class="head">
+        <h2>What should Composio care about?</h2>
+        <p>Deterministic workflow buckets, based only on supported fields. These are operational queues, not rankings.</p>
+      </header>
+      <div class="rows">
+        <button class="bucket t-easy" data-bucket-jump="easy_integration_candidates"><b>21</b><span>Easy integration candidates</span><small>Known auth, usable API, self-serve access, buildable</small></button>
+        <button class="bucket t-gated" data-bucket-jump="needs_outreach_gated"><b>1</b><span>Needs outreach / gated</span><small>Usable API with documented gated access</small></button>
+        <button class="bucket t-research" data-bucket-jump="needs_further_research"><b>73</b><span>Needs further research</span><small>An important feasibility field remains unresolved</small></button>
+        <button class="bucket t-blocked" data-bucket-jump="blocked"><b>5</b><span>Blocked</span><small>Blocked buildability or a recorded material blocker</small></button>
       </div>
-    </section>
+    </section> -->
 
-    <section class="section wrap" id="opportunity">
-      <div class="section-head"><p class="eyebrow">02 · Product decision</p><h2>What should Composio care about?</h2><p>Deterministic workflow buckets, based only on supported fields. These are operational queues, not rankings.</p></div>
-      <div class="buckets">
-        <button data-bucket-jump="easy_integration_candidates"><b>21</b><span>Easy integration candidates</span><small>Known auth + usable API + self-serve access + buildable</small></button>
-        <button data-bucket-jump="needs_outreach_gated"><b>1</b><span>Needs outreach / gated</span><small>Usable API with documented gated access</small></button>
-        <button data-bucket-jump="needs_further_research"><b>73</b><span>Needs further research</span><small>An important feasibility field remains unresolved</small></button>
-        <button data-bucket-jump="blocked"><b>5</b><span>Blocked</span><small>Blocked buildability or a recorded material blocker</small></button>
-      </div>
-    </section>
+      <div class="sep line" aria-hidden="true"></div>
 
-    <section id="agent" class="section wrap">
-      <div class="section-head"><p class="eyebrow">03 · System</p><h2>A conservative agent by design</h2><p>Each application runs independently through a bounded research and validation loop.</p></div>
-      <ol class="flow" aria-label="Research architecture"><li>App target</li><li>Research controller</li><li>Composio search + URL fetch</li><li>Gemini synthesis</li><li>Evidence ledger</li><li>Deterministic sanitizer</li><li>Structured JSON</li></ol>
-      <blockquote><code>supported claim → may survive</code><code>unsupported claim → unknown</code></blockquote>
-      <div class="two-col"><p>The agent prioritizes current official sources, researches one app at a time, and works within a ten-action budget. Search snippets discover sources; fetched pages support claims.</p><p>Structured output is locally validated, evidence is mapped to controlled field identifiers, and the 100-app runner resumes from valid result files after provider interruptions.</p></div>
-    </section>
+      <section id="agent" class="block line">
+        <header class="head">
+          <h2>A conservative agent by design</h2>
+          <p>
+            Each application runs independently through a bounded research and
+            validation loop.
+          </p>
+        </header>
+        <ol class="pipeline" aria-label="Research architecture">
+          <li>App target</li>
+          <li>Research controller</li>
+          <li>Composio search + URL fetch</li>
+          <li>Gemini synthesis</li>
+          <li>Evidence ledger</li>
+          <li>Deterministic sanitizer</li>
+          <li>Structured JSON</li>
+        </ol>
+        <div class="rule-box">
+          <code>supported claim → may survive</code>
+          <code>unsupported claim → unknown</code>
+        </div>
+        <div class="two-col">
+          <p>
+            The agent prioritizes current official sources, researches one app
+            at a time, and works within a ten-action budget. Search snippets
+            discover sources; fetched pages support claims.
+          </p>
+          <p>
+            Structured output is locally validated, evidence is mapped to
+            controlled field identifiers, and the 100-app runner resumes from
+            valid result files after provider interruptions.
+          </p>
+        </div>
+      </section>
 
-    <section id="verification" class="section wrap">
-      <div class="section-head"><p class="eyebrow">04 · Verification</p><h2>Precision and coverage are different product metrics</h2></div>
-      <div class="definitions"><p><strong>Precision</strong><span>When a supported claim survives, how often is it correct?</span></p><p><strong>Coverage miss</strong><span>When useful evidence exists, how often did the system still return unknown?</span></p></div>
-      <ol class="timeline">
-        <li><span>Phase 1 validation</span><strong>37 correct · 0 incorrect · 0 unsupported</strong><p>The evidence ledger and sanitizer established a high-precision baseline.</p></li>
-        <li><span>Production run</span><strong>100 / 100 completed</strong><p>Sequential, resumable execution survived quota interruption without losing work.</p></li>
-        <li><span>Independent 14-app audit</span><strong>93.55% precision · 24.47% coverage miss</strong><p>Precision was strong; access and buildability coverage were the main weakness.</p></li>
-        <li class="experiment"><span>Coverage experiment</span><strong>96.15% precision · 35.42% coverage miss</strong><p>Stricter control improved precision but made the product less complete.</p></li>
-        <li><span>Final audit</span><strong>56 correct · 0 incorrect · 0 unsupported</strong><p>100% precision on surviving sampled claims; 28.57% coverage miss.</p></li>
-      </ol>
-    </section>
+      <section id="verification" class="block line">
+        <header class="head">
+          <h2>Precision and coverage are different product metrics</h2>
+        </header>
+        <div class="defs">
+          <p>
+            <strong>Precision</strong
+            ><span
+              >When a supported claim survives, how often is it correct?</span
+            >
+          </p>
+          <p>
+            <strong>Coverage miss</strong
+            ><span
+              >When useful evidence exists, how often did the system still
+              return unknown?</span
+            >
+          </p>
+        </div>
+        <ol class="timeline">
+          <li>
+            <span>Phase 1 validation</span
+            ><strong>37 correct · 0 incorrect · 0 unsupported</strong>
+            <p>
+              The evidence ledger and sanitizer established a high-precision
+              baseline.
+            </p>
+          </li>
+          <li>
+            <span>Production run</span><strong>100 / 100 completed</strong>
+            <p>
+              Sequential, resumable execution survived quota interruption
+              without losing work.
+            </p>
+          </li>
+          <li>
+            <span>Independent 14-app audit</span
+            ><strong>93.55% precision · 24.47% coverage miss</strong>
+            <p>
+              Precision was strong; access and buildability coverage were the
+              main weakness.
+            </p>
+          </li>
+          <li class="experiment">
+            <span>Coverage experiment</span
+            ><strong>96.15% precision · 35.42% coverage miss</strong>
+            <p>
+              Stricter control improved precision but made the product less
+              complete.
+            </p>
+          </li>
+          <li>
+            <span>Final audit</span
+            ><strong>56 correct · 0 incorrect · 0 unsupported</strong>
+            <p>
+              100% precision on surviving sampled claims; 28.57% coverage miss.
+            </p>
+          </li>
+        </ol>
+      </section>
 
-    <section class="section wrap experiment-note">
-      <p class="eyebrow">05 · Decision log</p><h2>An optimization I rejected</h2>
-      <p>The Phase 3B controller tried to allocate the budget more aggressively and recover more fields. It removed incorrect claims, but coverage miss rose from 24.47% to 35.42%. I restored the better research controller and retained only independently justified semantic safeguards.</p>
-      <div class="comparison" aria-label="Precision and coverage comparison">
-        <div><span>Phase 3</span><b>93.55%</b><small>precision</small><b>24.47%</b><small>coverage miss</small></div>
-        <div class="rejected"><span>Rejected experiment</span><b>96.15%</b><small>precision</small><b>35.42%</b><small>coverage miss</small></div>
-        <div><span>Final</span><b>100%</b><small>precision</small><b>28.57%</b><small>coverage miss</small></div>
-      </div>
-    </section>
+      <section class="block line">
+        <header class="head">
+          <h2>An optimization I rejected</h2>
+        </header>
+        <p class="prose">
+          The Phase 3B controller tried to allocate the budget more aggressively
+          and recover more fields. It removed incorrect claims, but coverage
+          miss rose from 24.47% to 35.42%. I restored the better research
+          controller and retained only independently justified semantic
+          safeguards.
+        </p>
+        <div class="compare" aria-label="Precision and coverage comparison">
+          <div>
+            <span>Phase 3</span><b>93.55%</b><small>precision</small
+            ><b>24.47%</b><small>coverage miss</small>
+          </div>
+          <div class="rejected">
+            <span>Rejected experiment</span><b>96.15%</b><small>precision</small
+            ><b>35.42%</b><small>coverage miss</small>
+          </div>
+          <div>
+            <span>Final</span><b>100%</b><small>precision</small><b>28.57%</b
+            ><small>coverage miss</small>
+          </div>
+        </div>
+      </section>
 
-    <section class="section wrap">
-      <div class="section-head"><p class="eyebrow">06 · Failure examples</p><h2>Verification changed the system</h2></div>
-      <div class="failure-list">
-        <article><h3>Slack · HTTP ≠ REST</h3><p>Keyword mapping called its Web API REST. Slack explicitly describes it as RPC-style → REST now requires explicit official semantic support.</p></article>
-        <article><h3>NotebookLM · source purity</h3><p>Reverse-engineered cookie authentication polluted official Enterprise auth → authentication methods now require matching official evidence.</p></article>
-        <article><h3>Zendesk + NotebookLM · negative MCP</h3><p>Client docs and third-party tooling implied product absence → negative MCP claims now require explicit official evidence.</p></article>
-        <article><h3>Salesforce · mapping loss</h3><p>Good evidence existed but nested fields were dropped → the controlled evidence ledger preserves exact field support.</p></article>
-      </div>
-    </section>
+      <section class="block line">
+        <header class="head">
+          <h2>Verification changed the system</h2>
+          <p>
+            Four failures found by the audit, and the rule each one produced.
+          </p>
+        </header>
+        <div class="failures">
+          <article>
+            <h3>Slack: HTTP is not REST</h3>
+            <p>
+              Keyword mapping called its Web API REST. Slack explicitly
+              describes it as RPC-style, so REST now requires explicit official
+              semantic support.
+            </p>
+          </article>
+          <article>
+            <h3>NotebookLM: source purity</h3>
+            <p>
+              Reverse-engineered cookie authentication polluted official
+              Enterprise auth, so authentication methods now require matching
+              official evidence.
+            </p>
+          </article>
+          <article>
+            <h3>Zendesk + NotebookLM: negative MCP</h3>
+            <p>
+              Client docs and third-party tooling implied product absence, so
+              negative MCP claims now require explicit official evidence.
+            </p>
+          </article>
+          <article>
+            <h3>Salesforce: mapping loss</h3>
+            <p>
+              Good evidence existed but nested fields were dropped, so the
+              controlled evidence ledger now preserves exact field support.
+            </p>
+          </article>
+        </div>
+      </section>
 
-    <section id="dataset" class="section wide">
-      <div class="explorer-head wrap"><div><p class="eyebrow">07 · Dataset</p><h2>Inspect all 100 apps</h2><p>Filter the final structured results. Expand a row for blockers, unknown fields, and fetched evidence.</p></div><a href="data/research-dataset.json" download>Download JSON ↓</a></div>
-      <div class="filters" role="search">
-        <label><span>Search</span><input id="search" type="search" placeholder="Application name"></label>
-        <label><span>Category</span><select id="category"><option value="">All categories</option></select></label>
-        <label><span>Opportunity</span><select id="bucket"><option value="">All buckets</option><option value="easy_integration_candidates">Easy candidate</option><option value="needs_outreach_gated">Needs outreach</option><option value="needs_further_research">Further research</option><option value="blocked">Blocked</option></select></label>
-        <label><span>MCP</span><select id="mcp"><option value="">All MCP states</option><option>available</option><option>unknown</option><option>not_found</option></select></label>
-      </div>
-      <p id="result-count" class="result-count" aria-live="polite">Loading dataset…</p>
-      <div class="table-wrap"><table><thead><tr><th>App</th><th>Category</th><th>Auth</th><th>Access</th><th>API</th><th>MCP</th><th>Buildability</th><th>Unknowns</th></tr></thead><tbody id="rows"></tbody></table></div>
-      <noscript><p class="notice">JavaScript is required for filters. The complete JSON remains available above.</p></noscript>
-    </section>
+      <div class="sep line" aria-hidden="true"></div>
 
-    <section class="section wrap">
-      <div class="section-head"><p class="eyebrow">08 · Data quality</p><h2>Unknown is a finding about evidence, not the product</h2></div>
-      <div class="unknown-grid"><p><b>82</b><span>GraphQL unresolved</span></p><p><b>76</b><span>access unresolved</span></p><p><b>75</b><span>buildability unresolved</span></p><p><b>43</b><span>MCP unresolved</span></p><p><b>13</b><span>REST unresolved</span></p><p><b>4</b><span>auth unresolved</span></p></div>
-      <p class="caveat">The dataset supports prioritization and follow-up research. It does not support treating every unknown as “no,” or claiming the full 100-app dataset is perfectly accurate.</p>
-    </section>
+      <section id="dataset" class="block line">
+        <header class="head head-split">
+          <div>
+            <h2>Inspect all 100 apps</h2>
+            <p>
+              Filter the final structured results. Expand a row for blockers,
+              unknown fields, and fetched evidence.
+            </p>
+          </div>
+          <a class="btn" href="data/research-dataset.json" download
+            >Download JSON</a
+          >
+        </header>
+        <div class="filters" role="search">
+          <label
+            ><span>Search</span
+            ><input
+              id="search"
+              type="search"
+              placeholder="Application name"
+              autocomplete="off"
+          /></label>
+          <label
+            ><span>Category</span
+            ><select id="category">
+              <option value="">All categories</option>
+            </select></label
+          >
+          <label
+            ><span>Opportunity</span
+            ><select id="bucket">
+              <option value="">All buckets</option>
+              <option value="easy_integration_candidates">Integration ready</option>
+<option value="needs_outreach_gated">Gated / outreach</option>
+<option value="blocked">Evidence-backed blockers</option>
+<option value="needs_further_research">Verdict unresolved</option>
+            </select></label
+          >
+          <label
+            ><span>MCP</span
+            ><select id="mcp">
+              <option value="">All MCP states</option>
+              <option>available</option>
+              <option>unknown</option>
+              <option>not_found</option>
+            </select></label
+          >
+        </div>
+        <p id="result-count" class="result-count" aria-live="polite">
+          Loading dataset…
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>App</th>
+                <th>Category</th>
+                <th>Auth</th>
+                <th>Access</th>
+                <th>API</th>
+                <th>MCP</th>
+                <th>Buildability</th>
+                <th>Unknowns</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <noscript
+          ><p class="notice">
+            JavaScript is required for filters. The complete JSON is available
+            through the download link above.
+          </p></noscript
+        >
+      </section>
 
-    <section id="run" class="section wrap">
-      <div class="section-head"><p class="eyebrow">09 · Proof</p><h2>Run the same pipeline</h2></div>
-      <div class="code-grid"><pre><code>npm install
+      <section class="block line">
+        <header class="head">
+          <h2>Unknown is a finding about evidence</h2>
+          <p>
+            It says what the research could not confirm, not what the product
+            lacks.
+          </p>
+        </header>
+        <div class="unknowns">
+          <p><b>82</b><span>GraphQL unresolved</span></p>
+          <p><b>76</b><span>access unresolved</span></p>
+          <p><b>75</b><span>buildability unresolved</span></p>
+          <p><b>43</b><span>MCP unresolved</span></p>
+          <p><b>13</b><span>REST unresolved</span></p>
+          <p><b>4</b><span>auth unresolved</span></p>
+        </div>
+        <p class="note-inline">
+          The dataset supports prioritization and follow-up research. It does
+          not support treating every unknown as “no,” or claiming the full
+          100-app dataset is perfectly accurate.
+        </p>
+      </section>
+
+      <section id="run" class="block line">
+        <header class="head">
+          <h2>Run the same pipeline</h2>
+        </header>
+        <div class="code-grid">
+          <pre><code>npm install
 cp .env.example .env
 
-npm run research -- Salesforce</code></pre><pre><code>npm run research:all
+npm run research -- Salesforce</code></pre>
+          <pre><code>npm run research:all
 npm run analyze
 
 npm test
-npm run typecheck</code></pre></div>
-      <div class="method"><p><span>Research model</span><b>Gemini 3.5 Flash Lite</b></p><p><span>Research tools</span><b>Composio Search + URL retrieval</b></p><p><span>Per-app budget</span><b>10 actions</b></p><p><span>Dataset</span><b>100 apps · 10 categories</b></p><p><span>Verification</span><b>14-app representative audit</b></p><p><span>Storage</span><b>Validated JSON</b></p></div>
-    </section>
-  </main>
+npm run typecheck</code></pre>
+        </div>
+        <dl class="method">
+          <div>
+            <dt>Research model</dt>
+            <dd>Gemini 3.5 Flash Lite</dd>
+          </div>
+          <div>
+            <dt>Research tools</dt>
+            <dd>Composio Search + URL retrieval</dd>
+          </div>
+          <div>
+            <dt>Per-app budget</dt>
+            <dd>10 actions</dd>
+          </div>
+          <div>
+            <dt>Dataset</dt>
+            <dd>100 apps · 10 categories</dd>
+          </div>
+          <div>
+            <dt>Verification</dt>
+            <dd>14-app representative audit</dd>
+          </div>
+          <div>
+            <dt>Storage</dt>
+            <dd>Validated JSON</dd>
+          </div>
+        </dl>
+      </section>
 
-  <footer class="wrap"><span>Built for the Composio AI Product Ops Intern assessment.</span><a href="https://github.com/Abhishek-Sonje/composio-agent" target="_blank" rel="noreferrer">Source ↗</a></footer>
-  <template id="detail-template"><tr class="detail"><td colspan="8"><div class="detail-grid"><div><h4>Description</h4><p data-description></p><h4>Blocker</h4><p data-blocker></p></div><div><h4>Unknown fields</h4><p data-unknown></p><h4>Evidence</h4><ul data-evidence></ul></div></div></td></tr></template>
-</body>
+      <footer class="foot">
+        <span>Built for the Composio AI Product Ops Intern assessment.</span>
+        <a
+          href="https://github.com/Abhishek-Sonje/composio-agent"
+          target="_blank"
+          rel="noreferrer"
+          >Source ↗</a
+        >
+      </footer>
+    </main>
+
+    <template id="detail-template"
+      ><tr class="detail">
+        <td colspan="8">
+          <div class="detail-grid">
+            <div>
+              <h4>Description</h4>
+              <p data-description></p>
+              <h4>Blocker</h4>
+              <p data-blocker></p>
+            </div>
+            <div>
+              <h4>Unknown fields</h4>
+              <p data-unknown></p>
+              <h4>Evidence</h4>
+              <ul data-evidence></ul>
+            </div>
+          </div>
+        </td></tr
+    ></template>
+  </body>
 </html>
