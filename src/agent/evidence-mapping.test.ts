@@ -123,7 +123,7 @@ describe("applyFieldEvidence", () => {
     );
   });
 
-  it("does not recover REST from a fetched source that is not known to be official", () => {
+  it("does not accept REST from a fetched source not known to be official", () => {
     const unseenUrl = "https://unseen.example.com/rest";
     const mapped = applyFieldEvidence(
       result,
@@ -157,37 +157,6 @@ describe("applyFieldEvidence", () => {
     );
   });
 
-  it("recovers official access evidence when synthesis omits the ledger mapping", () => {
-    const accessResult = { ...result, accessModel: "self_serve_free" as const };
-    const mapped = applyFieldEvidence(
-      accessResult,
-      ledger(),
-      [{
-        url: restUrl,
-        content: "Create a free developer account and generate credentials in the developer portal.",
-      }],
-    );
-
-    expect(mapped.evidence.flatMap((item) => item.supports)).toContain(
-      "accessModel",
-    );
-  });
-
-  it("rejects REST when official documentation explicitly describes an RPC API", () => {
-    const mapped = applyFieldEvidence(
-      result,
-      ledger({ apiSurfaceRest: [restUrl] }),
-      [{
-        url: restUrl,
-        content: "The Web API is an HTTP RPC-style API. While it is not a REST API, it uses HTTP requests.",
-      }],
-    );
-
-    expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain(
-      "apiSurface.rest",
-    );
-  });
-
   it("rejects a negative GraphQL claim without explicit negative evidence", () => {
     const negativeResult = {
       ...result,
@@ -204,12 +173,12 @@ describe("applyFieldEvidence", () => {
     );
   });
 
-  it("rejects an explicit negative GraphQL claim from a third-party source", () => {
+  it("rejects explicit negative GraphQL evidence from a third party", () => {
     const negativeResult = {
       ...result,
       apiSurface: { ...result.apiSurface, graphql: false },
       evidence: [{
-        title: "Third-party API inventory",
+        title: "Third-party inventory",
         url: graphqlUrl,
         sourceType: "third_party" as const,
         supports: ["apiSurface.graphql" as const],
@@ -218,22 +187,32 @@ describe("applyFieldEvidence", () => {
     const mapped = applyFieldEvidence(
       negativeResult,
       ledger({ apiSurfaceGraphql: [graphqlUrl] }),
-      [{
-        url: graphqlUrl,
-        content: "This product does not provide a GraphQL API.",
-      }],
+      [{ url: graphqlUrl, content: "The product does not provide GraphQL." }],
     );
-
     expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain(
       "apiSurface.graphql",
     );
   });
 
-  it("removes auth methods supported only by unofficial reverse engineering", () => {
-    const unofficialUrl = "https://community.example.net/reverse-engineered-auth";
+  it("rejects REST when official documentation explicitly says the API is RPC", () => {
+    const mapped = applyFieldEvidence(
+      result,
+      ledger({ apiSurfaceRest: [restUrl] }),
+      [{
+        url: restUrl,
+        content: "This HTTP RPC-style Web API is not a REST API.",
+      }],
+    );
+    expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain(
+      "apiSurface.rest",
+    );
+  });
+
+  it("keeps official auth methods and removes reverse-engineered methods", () => {
+    const unofficialUrl = "https://community.example.net/reverse-auth";
     const authResult = {
       ...result,
-      authMethods: ["OAuth 2.0", "Browser session cookies"],
+      authMethods: ["OAuth 2.0 Access Tokens", "Browser session cookies"],
       evidence: [
         {
           title: "Official authentication",
@@ -242,7 +221,7 @@ describe("applyFieldEvidence", () => {
           supports: ["authMethods" as const],
         },
         {
-          title: "Reverse-engineered authentication",
+          title: "Reverse-engineered client",
           url: unofficialUrl,
           sourceType: "third_party" as const,
           supports: ["authMethods" as const],
@@ -253,81 +232,12 @@ describe("applyFieldEvidence", () => {
       authResult,
       ledger({ authMethods: [restUrl, unofficialUrl] }),
       [
-        { url: restUrl, content: "Use OAuth 2.0 to authorize API requests." },
-        {
-          url: unofficialUrl,
-          content: "This unofficial client reuses browser session cookies.",
-        },
+        { url: restUrl, content: "Use OAuth 2.0 access tokens." },
+        { url: unofficialUrl, content: "Reuse browser session cookies." },
       ],
     );
-
-    expect(mapped.authMethods).toEqual(["OAuth 2.0"]);
+    expect(mapped.authMethods).toEqual(["OAuth 2.0 Access Tokens"]);
     expect(mapped.evidence.map((item) => item.url)).not.toContain(unofficialUrl);
-  });
-
-  it("keeps semantically matching official auth methods with descriptive labels", () => {
-    const authResult = {
-      ...result,
-      authMethods: [
-        "OAuth 2.0 Access Tokens",
-        "Bearer API key",
-        "Personal Access Tokens (Fine-grained and Classic)",
-      ],
-      evidence: [{
-        title: "Official authentication",
-        url: restUrl,
-        sourceType: "official" as const,
-        supports: ["authMethods" as const],
-      }],
-    };
-    const mapped = applyFieldEvidence(
-      authResult,
-      ledger({ authMethods: [restUrl] }),
-      [{
-        url: restUrl,
-        content: "Use OAuth 2.0 access tokens, an API key in the Bearer header, or a fine-grained personal access token.",
-      }],
-    );
-
-    expect(mapped.authMethods).toEqual(authResult.authMethods);
-  });
-
-  it("recovers explicit positive API surfaces when synthesis returns unknown", () => {
-    const unknownApiResult = {
-      ...result,
-      apiSurface: { ...result.apiSurface, rest: null, graphql: null },
-    };
-    const mapped = applyFieldEvidence(
-      unknownApiResult,
-      ledger(),
-      [{
-        url: restUrl,
-        content: "The official REST API includes a documented GraphQL API endpoint.",
-      }],
-    );
-
-    expect(mapped.apiSurface.rest).toBe(true);
-    expect(mapped.apiSurface.graphql).toBe(true);
-    expect(mapped.evidence.flatMap((item) => item.supports)).toEqual(
-      expect.arrayContaining(["apiSurface.rest", "apiSurface.graphql"]),
-    );
-  });
-
-  it("recovers an explicit official access model when synthesis returns unknown", () => {
-    const unknownAccessResult = { ...result, accessModel: "unknown" as const };
-    const mapped = applyFieldEvidence(
-      unknownAccessResult,
-      ledger(),
-      [{
-        url: restUrl,
-        content: "Create a free developer account to build and test integrations.",
-      }],
-    );
-
-    expect(mapped.accessModel).toBe("self_serve_free");
-    expect(mapped.evidence.flatMap((item) => item.supports)).toContain(
-      "accessModel",
-    );
   });
 
   it("does not treat an MCP client page as product MCP server evidence", () => {
@@ -381,43 +291,35 @@ describe("applyFieldEvidence", () => {
     expect(mapped.evidence.flatMap((item) => item.supports)).toContain("mcp");
   });
 
-  it("rejects product MCP absence inferred from official MCP client documentation", () => {
-    const negativeMcpResult = {
-      ...result,
-      mcp: { status: "not_found" as const },
-    };
+  it("rejects product MCP absence inferred from official MCP client docs", () => {
+    const negativeResult = { ...result, mcp: { status: "not_found" as const } };
     const mapped = applyFieldEvidence(
-      negativeMcpResult,
+      negativeResult,
       ledger({ mcp: [restUrl] }),
       [{
         url: restUrl,
-        content: "Connect to external MCP servers and use MCP client tools in workflows.",
+        content: "Connect to external MCP servers using this MCP client.",
       }],
     );
-
     expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain("mcp");
   });
 
-  it("rejects a negative product MCP claim from a third-party source", () => {
-    const negativeMcpResult = {
+  it("rejects negative product MCP evidence from a third party", () => {
+    const negativeResult = {
       ...result,
       mcp: { status: "not_found" as const },
       evidence: [{
-        title: "Community MCP client",
+        title: "Community client",
         url: restUrl,
         sourceType: "third_party" as const,
         supports: ["mcp" as const],
       }],
     };
     const mapped = applyFieldEvidence(
-      negativeMcpResult,
+      negativeResult,
       ledger({ mcp: [restUrl] }),
-      [{
-        url: restUrl,
-        content: "No official MCP server was found by this community project.",
-      }],
+      [{ url: restUrl, content: "No official MCP server was found." }],
     );
-
     expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain("mcp");
   });
 });

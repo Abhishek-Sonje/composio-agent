@@ -67,93 +67,16 @@ function authMethodMentioned(method: string, content: string): boolean {
     [/access token/, /\baccess tokens?\b/i],
     [/cookie|session/, /\b(?:browser )?session cookies?\b/i],
   ];
-  const matchingConcepts = concepts.filter(([methodPattern]) =>
-    methodPattern.test(normalizedMethod)
+  const matchingConcepts = concepts.filter(([pattern]) =>
+    pattern.test(normalizedMethod)
   );
   if (matchingConcepts.length > 0) {
-    return matchingConcepts.every(([, contentPattern]) => contentPattern.test(content));
+    return matchingConcepts.every(([, pattern]) => pattern.test(content));
   }
 
-  const escaped = method
-    .trim()
-    .split(/\s+/)
-    .map(escapeRegExp)
-    .join("\\s+")
+  const escaped = method.trim().split(/\s+/).map(escapeRegExp).join("\\s+")
     .replace(/(?:key|token|cookie)$/i, "$&s?");
   return new RegExp(`\\b${escaped}\\b`, "i").test(content);
-}
-
-function explicitAccessModel(
-  content: string,
-): Exclude<AppResearchResult["accessModel"], "unknown"> | undefined {
-  if (/\b(?:enterprise (?:subscription|plan|edition).{0,50}(?:required|only)|(?:requires?|available only).{0,50}enterprise)\b/i.test(content)) {
-    return "enterprise_only";
-  }
-  if (/\b(?:standalone contract|required.{0,30}(?:contact|talk to) (?:our )?sales|contact (?:our )?sales)\b/i.test(content)) {
-    return "contact_sales";
-  }
-  if (/\b(?:administrator|admin).{0,60}(?:approval|required|approve|enable|grant)\b/i.test(content)) {
-    return "admin_approval";
-  }
-  if (/\bpartner(?:ship)? (?:account|program|approval).{0,40}required\b/i.test(content)) {
-    return "partnership_required";
-  }
-  if (/\b(?:free developer (?:account|portal|sandbox|test account)|free (?:account|plan|workspace)|developer edition.{0,40}free|open[- ]source|self[- ]host)\b/i.test(content)) {
-    return "self_serve_free";
-  }
-  if (/\b(?:free )?trial\b/i.test(content)) return "self_serve_trial";
-  if (/\b(?:paid (?:subscription|account|plan)|subscription required)\b/i.test(content)) {
-    return "self_serve_paid";
-  }
-  return undefined;
-}
-
-function recoverExplicitClaims(
-  result: AppResearchResult,
-  fetched: Map<string, FetchedSource>,
-): AppResearchResult {
-  const officialTexts = result.evidence.flatMap((item) => {
-    const source = fetched.get(normalizeUrl(item.url));
-    return item.sourceType === "official" && source?.content
-      ? [`${item.title}\n${item.url}\n${source.content}`]
-      : [];
-  });
-  const officialText = officialTexts.join("\n");
-  const explicitlyNotRest =
-    /\b(?:not|isn't|is not)\s+(?:a\s+)?REST(?:ful)?\s+API\b|\bRPC[- ]style\b.{0,80}\bnot\s+(?:a\s+)?REST/i;
-  const recoveredRest = result.apiSurface.rest === null &&
-    !explicitlyNotRest.test(officialText) &&
-    /\bREST(?:ful)?\s+API\b/i.test(officialText);
-  const recoveredGraphql = result.apiSurface.graphql === null &&
-    /\bGraphQL\s+(?:API|endpoint)\b/i.test(officialText);
-  const recoveredAccess = result.accessModel === "unknown"
-    ? explicitAccessModel(officialText)
-    : undefined;
-  if (!recoveredRest && !recoveredGraphql && !recoveredAccess) return result;
-
-  const unknownFields = result.unknownFields.filter((field) =>
-    !(recoveredRest && field === "apiSurface.rest") &&
-    !(recoveredGraphql && field === "apiSurface.graphql") &&
-    !(recoveredAccess && field === "accessModel")
-  );
-  const supportedApis = [
-    recoveredRest || result.apiSurface.rest === true ? "REST" : null,
-    recoveredGraphql || result.apiSurface.graphql === true ? "GraphQL" : null,
-  ].filter((value): value is string => value !== null);
-
-  return {
-    ...result,
-    accessModel: recoveredAccess ?? result.accessModel,
-    apiSurface: {
-      ...result.apiSurface,
-      rest: recoveredRest ? true : result.apiSurface.rest,
-      graphql: recoveredGraphql ? true : result.apiSurface.graphql,
-      summary: supportedApis.length > 0
-        ? `Cited official evidence supports ${supportedApis.join(" and ")}.`
-        : result.apiSurface.summary,
-    },
-    unknownFields,
-  };
 }
 
 function contentSupportsField(
@@ -172,7 +95,7 @@ function contentSupportsField(
 
   if (field === "accessModel") {
     const accessPatterns: Record<AppResearchResult["accessModel"], RegExp> = {
-      self_serve_free: /\b(?:free (?:developer (?:account|portal|sandbox|test account)|account|plan|workspace)|developer edition.{0,40}free|open[- ]source|self[- ]host)/i,
+      self_serve_free: /\b(?:free (?:account|plan|workspace)|developer edition.{0,40}free|open[- ]source|self[- ]host)/i,
       self_serve_trial: /\b(?:free )?trial\b/i,
       self_serve_paid: /\b(?:paid (?:account|plan)|subscription required)\b/i,
       admin_approval: /\b(?:tech(?:nical)? admin|administrator.{0,60}(?:approve|create|enable|grant|required))/i,
@@ -181,24 +104,7 @@ function contentSupportsField(
       contact_sales: /\bcontact (?:our )?sales\b/i,
       unknown: /$a/,
     };
-    return sourceType === "official" &&
-      accessPatterns[result.accessModel].test(content);
-  }
-
-  if (field === "apiSurface.rest") {
-    if (result.apiSurface.rest === true) {
-      const explicitlyNotRest =
-        /\b(?:not|isn't|is not)\s+(?:a\s+)?REST(?:ful)?\s+API\b|\bRPC[- ]style\b.{0,80}\bnot\s+(?:a\s+)?REST/i;
-      return sourceType === "official" &&
-        !explicitlyNotRest.test(content) &&
-        /\bREST(?:ful)?\s+API\b/i.test(content);
-    }
-    if (result.apiSurface.rest === false) {
-      return sourceType === "official" &&
-        /\b(?:does not|doesn't|no longer) (?:offer|support|provide|have).{0,50}REST(?:ful)?\s+API|\bREST(?:ful)?\s+API.{0,50}(?:is not supported|is unavailable|isn't supported)\b/i.test(
-          content,
-        );
-    }
+    return accessPatterns[result.accessModel].test(content);
   }
 
   if (field === "apiSurface.graphql" && result.apiSurface.graphql === false) {
@@ -206,6 +112,19 @@ function contentSupportsField(
       /\b(?:does not|doesn't|no longer) (?:offer|support|provide|have).{0,50}GraphQL|\bGraphQL.{0,50}(?:is not supported|is unavailable|isn't supported)\b/i.test(
         content,
       );
+  }
+
+  if (field === "apiSurface.rest") {
+    const explicitNonRest =
+      /\b(?:not|isn't|is not)\s+(?:a\s+)?REST(?:ful)?\s+API\b|\bRPC[- ]style\b.{0,80}\bnot\s+(?:a\s+)?REST/i;
+    if (result.apiSurface.rest === true) {
+      return sourceType === "official" && !explicitNonRest.test(content) &&
+        /\bREST(?:ful)?\s+API\b/i.test(content);
+    }
+    if (result.apiSurface.rest === false) {
+      return sourceType === "official" &&
+        /\b(?:does not|doesn't|no longer) (?:offer|support|provide|have).{0,50}REST(?:ful)?\s+API|\bREST(?:ful)?\s+API.{0,50}(?:is not supported|is unavailable|isn't supported)\b/i.test(content);
+    }
   }
 
   if (field === "mcp" && result.mcp.status === "available") {
@@ -244,10 +163,8 @@ function contentSupportsField(
   }
 
   if (field === "mcp" && result.mcp.status !== "unknown") {
-    if (sourceType !== "official") return false;
-    const explicitNegative =
-      /\b(?:does not|doesn't|no longer) (?:offer|support|provide|have).{0,60}(?:official )?MCP (?:server|service)|\b(?:official )?MCP (?:server|service).{0,60}(?:is not supported|is unavailable|isn't available)\b/i;
-    return explicitNegative.test(content);
+    return sourceType === "official" &&
+      /\b(?:does not|doesn't|no longer) (?:offer|support|provide|have).{0,60}(?:official )?MCP (?:server|service)|\b(?:official )?MCP (?:server|service).{0,60}(?:is not supported|is unavailable|isn't available)\b/i.test(content);
   }
 
   return true;
@@ -267,9 +184,8 @@ export function applyFieldEvidence(
         : source,
     ]),
   );
-  const effectiveResult = recoverExplicitClaims(result, fetched);
   const evidenceByUrl = new Map(
-    effectiveResult.evidence.map((item) => [normalizeUrl(item.url), item]),
+    result.evidence.map((item) => [normalizeUrl(item.url), item]),
   );
 
   for (const [ledgerField, urls] of Object.entries(fieldEvidence) as Array<
@@ -281,7 +197,7 @@ export function applyFieldEvidence(
       if (!fetched.has(normalized)) continue;
       const item = evidenceByUrl.get(normalized);
       if (!contentSupportsField(
-        effectiveResult,
+        result,
         resultField,
         fetched.get(normalized)?.content ?? "",
         item?.sourceType ?? "third_party",
@@ -298,42 +214,36 @@ export function applyFieldEvidence(
   // Exact protocol names in a fetched page are deterministic evidence for a
   // positive technical-surface claim. This repairs missed ledger entries
   // without inferring availability from model memory or search snippets.
-  for (const item of effectiveResult.evidence) {
+  for (const item of result.evidence) {
     const normalized = normalizeUrl(item.url);
     const source = fetched.get(normalized);
     if (!source?.content) continue;
 
     const text = `${item.title}\n${item.url}\n${source.content}`;
     const supports = supportsByUrl.get(normalized) ?? new Set<ResearchField>();
-    if (contentSupportsField(effectiveResult, "authMethods", text, item.sourceType, item.url)) {
+    if (contentSupportsField(result, "authMethods", text, item.sourceType, item.url)) {
       supports.add("authMethods");
     }
     if (
-      effectiveResult.apiSurface.rest !== null &&
-      contentSupportsField(effectiveResult, "apiSurface.rest", text, item.sourceType, item.url)
+      result.apiSurface.rest !== null &&
+      contentSupportsField(result, "apiSurface.rest", text, item.sourceType, item.url)
     ) {
       supports.add("apiSurface.rest");
     }
-    if (effectiveResult.apiSurface.graphql === true && /\bGraphQL\b/i.test(text)) {
+    if (result.apiSurface.graphql === true && /\bGraphQL\b/i.test(text)) {
       supports.add("apiSurface.graphql");
     }
     if (
-      effectiveResult.accessModel !== "unknown" &&
-      contentSupportsField(effectiveResult, "accessModel", text, item.sourceType, item.url)
-    ) {
-      supports.add("accessModel");
-    }
-    if (
-      effectiveResult.mcp.status === "available" &&
-      contentSupportsField(effectiveResult, "mcp", text, item.sourceType, item.url)
+      result.mcp.status === "available" &&
+      contentSupportsField(result, "mcp", text, item.sourceType, item.url)
     ) {
       supports.add("mcp");
     }
     if (supports.size > 0) supportsByUrl.set(normalized, supports);
   }
 
-  const supportedAuthMethods = effectiveResult.authMethods.filter((method) =>
-    effectiveResult.evidence.some((item) => {
+  const supportedAuthMethods = result.authMethods.filter((method) =>
+    result.evidence.some((item) => {
       const normalized = normalizeUrl(item.url);
       const source = fetched.get(normalized);
       return item.sourceType === "official" &&
@@ -348,7 +258,7 @@ export function applyFieldEvidence(
   }
 
   const seen = new Set<string>();
-  const evidence = effectiveResult.evidence.flatMap((item) => {
+  const evidence = result.evidence.flatMap((item) => {
     const normalized = normalizeUrl(item.url);
     if (seen.has(normalized)) return [];
     seen.add(normalized);
@@ -369,7 +279,7 @@ export function applyFieldEvidence(
   }
 
   return appResearchResultSchema.parse({
-    ...effectiveResult,
+    ...result,
     authMethods: supportedAuthMethods,
     evidence,
   });
