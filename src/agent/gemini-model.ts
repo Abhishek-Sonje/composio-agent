@@ -33,6 +33,24 @@ type GenerateJson = (request: {
 }) => Promise<string>;
 
 const MAX_MODEL_ATTEMPTS = 3;
+const MAX_STRUCTURED_OUTPUT_ATTEMPTS = 2;
+
+export async function withMalformedOutputRetry<T>(
+  operation: () => Promise<T>,
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= MAX_STRUCTURED_OUTPUT_ATTEMPTS; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (!(error instanceof SyntaxError) && !(error instanceof z.ZodError)) {
+        throw error;
+      }
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
 
 function retryDelayMilliseconds(error: unknown, attempt: number): number | null {
   const message = error instanceof Error ? error.message : String(error);
@@ -148,25 +166,29 @@ ${FINAL_RESULT_INSTRUCTION}
 Research state and stopping condition:
 ${JSON.stringify(context, null, 2)}`;
 
-      const resultText = await generate({
-        model: gemini.model,
-        prompt,
-        schema: z.toJSONSchema(appResearchResultSchema),
+      const result = await withMalformedOutputRetry(async () => {
+        const resultText = await generate({
+          model: gemini.model,
+          prompt,
+          schema: z.toJSONSchema(appResearchResultSchema),
+        });
+        return appResearchResultSchema.parse(JSON.parse(resultText));
       });
-      const result = appResearchResultSchema.parse(JSON.parse(resultText));
 
-      const mappingText = await generate({
-        model: gemini.model,
-        prompt: `${EVIDENCE_MAPPING_INSTRUCTION}
+      const fieldEvidence = await withMalformedOutputRetry(async () => {
+        const mappingText = await generate({
+          model: gemini.model,
+          prompt: `${EVIDENCE_MAPPING_INSTRUCTION}
 
 Candidate result and evidence list:
 ${JSON.stringify(result, null, 2)}
 
 Gathered research observations:
 ${JSON.stringify(context.observations, null, 2)}`,
-        schema: z.toJSONSchema(fieldEvidenceSchema),
+          schema: z.toJSONSchema(fieldEvidenceSchema),
+        });
+        return fieldEvidenceSchema.parse(JSON.parse(mappingText));
       });
-      const fieldEvidence = fieldEvidenceSchema.parse(JSON.parse(mappingText));
 
       const fetchedSources = context.observations
         .filter(
