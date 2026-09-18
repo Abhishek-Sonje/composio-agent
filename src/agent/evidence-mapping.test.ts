@@ -261,6 +261,71 @@ describe("applyFieldEvidence", () => {
     expect(mapped.evidence.map((item) => item.url)).not.toContain(unofficialUrl);
   });
 
+  it("keeps semantically matching official auth methods with descriptive labels", () => {
+    const authResult = {
+      ...result,
+      authMethods: [
+        "OAuth 2.0 Access Tokens",
+        "Bearer API key",
+        "Personal Access Tokens (Fine-grained and Classic)",
+      ],
+      evidence: [{
+        title: "Official authentication",
+        url: restUrl,
+        sourceType: "official" as const,
+        supports: ["authMethods" as const],
+      }],
+    };
+    const mapped = applyFieldEvidence(
+      authResult,
+      ledger({ authMethods: [restUrl] }),
+      [{
+        url: restUrl,
+        content: "Use OAuth 2.0 access tokens, an API key in the Bearer header, or a fine-grained personal access token.",
+      }],
+    );
+
+    expect(mapped.authMethods).toEqual(authResult.authMethods);
+  });
+
+  it("recovers explicit positive API surfaces when synthesis returns unknown", () => {
+    const unknownApiResult = {
+      ...result,
+      apiSurface: { ...result.apiSurface, rest: null, graphql: null },
+    };
+    const mapped = applyFieldEvidence(
+      unknownApiResult,
+      ledger(),
+      [{
+        url: restUrl,
+        content: "The official REST API includes a documented GraphQL API endpoint.",
+      }],
+    );
+
+    expect(mapped.apiSurface.rest).toBe(true);
+    expect(mapped.apiSurface.graphql).toBe(true);
+    expect(mapped.evidence.flatMap((item) => item.supports)).toEqual(
+      expect.arrayContaining(["apiSurface.rest", "apiSurface.graphql"]),
+    );
+  });
+
+  it("recovers an explicit official access model when synthesis returns unknown", () => {
+    const unknownAccessResult = { ...result, accessModel: "unknown" as const };
+    const mapped = applyFieldEvidence(
+      unknownAccessResult,
+      ledger(),
+      [{
+        url: restUrl,
+        content: "Create a free developer account to build and test integrations.",
+      }],
+    );
+
+    expect(mapped.accessModel).toBe("self_serve_free");
+    expect(mapped.evidence.flatMap((item) => item.supports)).toContain(
+      "accessModel",
+    );
+  });
+
   it("does not treat an MCP client page as product MCP server evidence", () => {
     const mcpResult = {
       ...result,

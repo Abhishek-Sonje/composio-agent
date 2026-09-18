@@ -95,6 +95,22 @@ describe("selectResearchFocus", () => {
     ).toBeUndefined();
   });
 
+  it("allows a fetch when a focused GraphQL search finds a promising result", () => {
+    expect(
+      selectResearchFocus([
+        observation("authentication", "fetch_url", "OAuth 2.0"),
+        observation("access", "fetch_url", "Create a free developer account"),
+        observation("rest", "fetch_url", "REST API"),
+        observation("mcp", "fetch_url", "Official MCP server"),
+        observation(
+          "graphql",
+          "search",
+          "GraphQL API documentation https://example.com/developers/graphql",
+        ),
+      ]),
+    ).toBe("graphql");
+  });
+
   it("does not schedule direct buildability research", () => {
     expect(selectResearchFocus([])).toBe("authentication");
     expect(selectResearchFocus([])).not.toBe("buildability");
@@ -180,6 +196,44 @@ describe("researchApp", () => {
         stepsUsed: 2,
         stoppedBecause: "budget_exhausted",
       }),
+    );
+  });
+
+  it("uses a deterministic access discovery query for the first access search", async () => {
+    const model: ResearchModel = {
+      chooseAction: vi
+        .fn()
+        .mockResolvedValueOnce({
+          action: "fetch_url",
+          url: "https://example.com/auth",
+          purpose: "Inspect authentication",
+        })
+        .mockResolvedValueOnce({
+          action: "search",
+          query: "generic access search",
+          purpose: "Find access",
+        }),
+      createResult: vi.fn().mockResolvedValue(result),
+    };
+    const tools = {
+      search: vi.fn().mockResolvedValue({ results: [] }),
+      fetchUrl: vi.fn().mockResolvedValue({ content: "OAuth 2.0" }),
+    };
+
+    await researchApp(
+      { name: "Example" },
+      {
+        model,
+        tools,
+        maxSteps: 2,
+        log: vi.fn(),
+      },
+    );
+
+    expect(tools.search).toHaveBeenLastCalledWith(
+      expect.stringContaining(
+        "official developer signup API credentials pricing plan admin enterprise partner",
+      ),
     );
   });
 
