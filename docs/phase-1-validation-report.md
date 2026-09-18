@@ -1,81 +1,98 @@
 # Phase 1 final validation
 
-Validated on 2026-09-18 with the current ten-action pipeline and `gemini-3.5-flash-lite`. The sample contains six applications from the assessment list plus Gong as the requested carry-over regression target.
+Validated on 2026-09-18 with the ten-action pipeline and `gemini-3.5-flash-lite`. The sample contains six applications from the assessment list plus Gong as the requested carry-over regression target.
 
 ## Sample
 
 | App | Reason selected |
 | --- | --- |
-| Salesforce | Broad OAuth APIs, gated enterprise controls, REST, GraphQL, and official MCP |
+| Salesforce | OAuth, free Developer Edition, REST, GraphQL, and official hosted MCP |
 | Stripe | Self-serve API keys, OAuth, broad REST API, and official MCP |
-| Gong | Admin-gated enterprise API and current official MCP |
-| GitHub | Developer-focused platform with PAT, app, OAuth, REST, GraphQL, and official MCP |
-| Twenty | Open-source/self-hostable CRM with API keys, OAuth, REST, GraphQL, and an emerging MCP server |
-| Notion | Self-serve REST/OAuth product with official hosted MCP |
-| Fanbasis (Commas) | Sparse and ambiguous product documentation with an API key REST surface |
+| Gong | Administrator-gated enterprise API and official MCP |
+| GitHub | Developer-focused platform with free access, several auth modes, REST, GraphQL, and official MCP |
+| Twenty | Open-source and self-hostable CRM with API keys, OAuth, REST, GraphQL, and emerging MCP support |
+| Notion | Self-serve REST and OAuth product with official hosted MCP |
+| Fanbasis (Commas) | Sparse, ambiguous documentation with an API-key REST surface |
 
-## Field audit
+## Before and after
 
-The classifications compare the final pipeline output with current official documentation. `Correctly_unknown` means the checked official evidence did not justify a stronger value. `Unnecessary_unknown` means current evidence existed but the run did not discover or preserve it.
+The classifications cover authentication, access model, REST, GraphQL, MCP, buildability, and blocker for each app: 49 fields total.
+
+| Classification | Before | After |
+| --- | ---: | ---: |
+| Correct | 29 | 37 |
+| Incorrect | 0 | 0 |
+| Unsupported | 0 | 0 |
+| Unnecessary unknown | 13 | 5 |
+| Correctly unknown | 7 | 7 |
+
+Unnecessary unknowns fell from 13 to 5 (61.5%) without allowing an incorrect or unsupported claim to survive.
+
+## Final field audit
+
+`unnecessary_unknown` means current official evidence exists but this run did not preserve it. `correctly_unknown` means the checked evidence did not justify a stronger value.
 
 | App | Auth | Access | REST | GraphQL | MCP | Buildability | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Salesforce | correct | unnecessary_unknown | correct | unnecessary_unknown | correct | unnecessary_unknown | correct |
+| Salesforce | correct | correct | correct | correct | correct | correct | correct |
 | Stripe | correct | unnecessary_unknown | correct | correctly_unknown | correct | unnecessary_unknown | correct |
-| Gong | correct | unnecessary_unknown | correct | correctly_unknown | unnecessary_unknown | unnecessary_unknown | correct |
-| GitHub | correct | unnecessary_unknown | correct | correct | correct | unnecessary_unknown | correct |
-| Twenty | correct | correct | correct | correct | unnecessary_unknown | unnecessary_unknown | correct |
-| Notion | correct | correct | correct | correctly_unknown | correct | unnecessary_unknown | correct |
+| Gong | correct | correct | correct | correctly_unknown | correct | correct | correct |
+| GitHub | correct | correct | correct | correct | correct | correct | correct |
+| Twenty | correct | correct | correct | correct | unnecessary_unknown | correct | correct |
+| Notion | correct | unnecessary_unknown | correct | correctly_unknown | correct | unnecessary_unknown | correct |
 | Fanbasis (Commas) | correct | correctly_unknown | correct | correctly_unknown | correctly_unknown | correctly_unknown | correct |
 
-Totals across 49 checked fields:
+## Research-control diagnosis
 
-- correct: 29
-- incorrect: 0
-- unsupported: 0
-- unnecessary_unknown: 13
-- correctly_unknown: 7
+Earlier traces showed three general causes of budget starvation:
 
-## Manual evidence
+- coverage was evaluated only when the model tried to finish, so ordinary action selection had no current field priority;
+- all missing fields were treated equally, allowing repeated negative GraphQL searches before access or MCP research;
+- action purpose and cross-field page text could falsely mark another field as covered.
 
-- Salesforce officially documents [OAuth 2.0 for REST](https://developer.salesforce.com/docs/platform/api-rest/guide/intro-oauth-and-connected-apps.html), the [GraphQL API](https://developer.salesforce.com/docs/platform/graphql/guide/authorization.html), [Hosted MCP Servers](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html), and a [free Developer Edition](https://www.salesforce.com/products/free-trial/developer/).
-- Stripe documents its [REST API](https://docs.stripe.com/api), [self-serve sandbox and API keys](https://docs.stripe.com/keys), and [official MCP server](https://docs.stripe.com/mcp). No current official source explicitly establishes that Stripe has no GraphQL API, so `unknown` is the conservative result.
-- Gong documents [Basic and OAuth authentication plus technical-admin credential creation](https://help.gong.io/apidocs/introduction-2) and a current [official MCP server](https://help.gong.io/docs/about-gong-mcp-server). No current official GraphQL evidence was found.
-- GitHub documents the [REST API](https://docs.github.com/en/rest), [GraphQL API](https://docs.github.com/en/graphql), [PAT, GitHub App, OAuth, and `GITHUB_TOKEN` authentication](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github), and the [official GitHub MCP server](https://github.com/github/github-mcp-server).
-- Twenty documents [self-serve API keys, OAuth, REST, and GraphQL](https://docs.twenty.com/developers/extend/api). Current official repository issues demonstrate a shipped `/mcp` server, including [server protocol behavior](https://github.com/twentyhq/twenty/issues/18524), although compatibility defects remain.
-- Notion documents [Bearer tokens, PATs, OAuth, free personal workspaces, and its REST API](https://developers.notion.com/reference/intro), plus the [official hosted Notion MCP service](https://developers.notion.com/guides/mcp/get-started-with-mcp). No current official GraphQL evidence was found.
-- Fanbasis/Commas exposes an API-key REST surface through its [API reference](https://commasdocs.com/). The checked official material did not establish self-serve credential acquisition, GraphQL, or a product-owned MCP server. Zapier offers a Fanbasis route through Zapier MCP, but that does not establish a Fanbasis-operated MCP service.
+The final controller evaluates coverage after each action, selects the highest-priority unresolved field, and gives the model one precise research question. Coverage comes only from fetched content gathered for that focus. Each focus is limited to a search and one fetch, keeping the total at ten actions. GraphQL is last and cannot consume more than its two allocated actions. Buildability is not researched directly; it is derived only after supported authentication, credential access, and a usable API are present.
 
-## False positives and fixes
+The final traces consistently followed this order:
 
-The unchanged baseline produced semantic false positives:
+1. authentication search and fetch;
+2. credential/access search and fetch;
+3. REST/API search and fetch;
+4. product-owned MCP search and fetch;
+5. GraphQL search and, when a candidate existed, one fetch.
 
-- Salesforce `enterprise_only` was mapped from a GraphQL authorization page that did not support that access value.
-- Stripe and Notion `graphql: false` were supported by third-party pages that only reported an absence of documentation.
-- Fanbasis `self_serve_free` and the dependent `buildable` result lacked evidence for credential acquisition.
-- Generic MCP wording could validate availability even when a page described an MCP client connecting to external servers.
+## Evidence and false-positive review
 
-The final pipeline rejects these mappings. No incorrect or unsupported claim survived in the final seven-app results.
+Every surviving feasibility claim cites a fetched page. The checked pages refer to the intended product and contain field-specific support. Search snippets remain discovery-only.
 
-General fixes made during validation:
+The final audit found one semantic false positive during validation: a Zapier Fanbasis MCP route was initially treated as a Fanbasis-operated MCP server. MCP availability now requires both product-specific server language and a product-owned official source. The rerun correctly returns Fanbasis MCP to `unknown`. Product-owned Salesforce, Stripe, Gong, GitHub, and Notion MCP claims continue to survive. Twenty remains unknown in the final run because the fetched repository issue did not establish current product-owned availability strongly enough.
 
-- honor the full provider-specified per-minute retry window;
-- validate access-model, negative GraphQL, and MCP mappings against value-specific source language;
-- retain and deduplicate relevant fetched sources omitted by synthesis;
-- distinguish a product MCP service from an MCP client;
-- retry malformed structured synthesis once, with a strict bound.
+Third-party Stripe GraphQL wrappers and indirect Gong/Notion GraphQL pages did not establish product GraphQL availability or absence. Those fields remain unknown. No negative API claim was inferred from a failed search.
 
-## Remaining failures and limitations
+## Changes made
 
-The remaining failures are primarily research/stopping failures rather than sanitization failures:
+- prioritize unresolved fields in feasibility order;
+- isolate field coverage to fetched content gathered for that focus;
+- cap repeated field attempts and put GraphQL last;
+- distinguish credential availability from token or endpoint documentation;
+- derive `buildable` only from supported auth, access, and usable API prerequisites;
+- require product-owned official sources for positive MCP availability.
 
-- The ten-action budget is frequently spent repeatedly searching for explicit negative GraphQL evidence, reducing coverage of access and buildability.
-- Search freshness is inconsistent. Gong and Twenty had current official MCP evidence that some runs did not discover.
-- Access-model research remains incomplete for well-documented self-serve products such as Salesforce, Stripe, and GitHub.
-- Buildability is consequently unknown for six of seven apps even when the manually verified underlying evidence is sufficient for five of them.
-- Live validation remains sensitive to Gemini daily quotas. Per-minute waits and malformed structured responses now recover boundedly; daily exhaustion still requires another project key.
-- Fanbasis ownership and credential-acquisition documentation remain ambiguous, so conservative unknowns are appropriate.
+The evidence ledger, fetched-source enforcement, controlled field identifiers, duplicate removal, confidence ceilings, provider retries, structured-output retry, and conservative unknown fallback remain active.
+
+## Remaining limitations
+
+- Stripe and Notion account or plan pages were not rendered with enough explicit text in these runs to support their otherwise documented self-serve access models. Their dependent buildability values therefore remain unknown.
+- Twenty's current MCP implementation is documented in official repository activity, but this run did not obtain evidence strong enough for the positive MCP rule.
+- Live output still varies with search ranking and provider synthesis. The deterministic controller bounds that variability and the sanitizer prevents unsupported values from surviving.
+- Fanbasis credential acquisition, GraphQL, product-owned MCP, and buildability remain legitimately unresolved in the checked official material.
+
+## Verification
+
+- 61 tests pass across 9 test files.
+- TypeScript type checking passes.
+- Production build passes.
+- The action budget remains capped at 10.
 
 ## Recommendation
 
-Do not freeze Phase 1 or start the 100-app run yet. The final results have strong precision—zero incorrect or unsupported surviving fields in this sample—but 13 of 49 checked fields (26.5%) are unnecessary unknowns. The remaining issue is systematic completeness in research prioritization and stopping, especially for access model, buildability, and fresh MCP documentation. Resolve that general behavior and repeat this validation set before freezing.
+Phase 1 is stable enough to freeze. The seven-app regression reduced unnecessary unknowns by 61.5%, preserved zero incorrect and zero unsupported surviving fields, and showed no new systemic regression after the MCP ownership fix. Do not change the research agent further or start the 100-app run until the next phase begins.
