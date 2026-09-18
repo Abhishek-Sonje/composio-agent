@@ -48,6 +48,18 @@ describe("selectResearchFocus", () => {
     ).toBe("access");
   });
 
+  it("does not let incidental content satisfy another research focus", () => {
+    expect(
+      selectResearchFocus([
+        observation(
+          "authentication",
+          "fetch_url",
+          "OAuth 2.0 setup requires an administrator to create a connected app",
+        ),
+      ]),
+    ).toBe("access");
+  });
+
   it("limits GraphQL research to two successful actions", () => {
     expect(
       selectResearchFocus([
