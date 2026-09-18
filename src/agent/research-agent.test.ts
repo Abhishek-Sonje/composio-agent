@@ -5,9 +5,54 @@ import {
   applyConfidencePolicy,
   compactToolOutput,
   removeUnsupportedClaims,
+  selectResearchFocus,
   researchApp,
   type ResearchModel,
 } from "./research-agent.js";
+
+describe("selectResearchFocus", () => {
+  const observation = (
+    focus: "authentication" | "access" | "rest" | "mcp" | "graphql",
+    action: "search" | "fetch_url",
+    output: string,
+  ) => ({ step: 1, action, focus, purpose: focus, input: focus, output });
+
+  it("prioritizes access before lower-value API checks once auth is supported", () => {
+    expect(
+      selectResearchFocus([
+        observation("authentication", "fetch_url", "OAuth 2.0 authentication"),
+      ]),
+    ).toBe("access");
+  });
+
+  it("does not revisit a supported field", () => {
+    expect(
+      selectResearchFocus([
+        observation("authentication", "fetch_url", "OAuth 2.0"),
+        observation("access", "fetch_url", "Create a free developer account"),
+        observation("rest", "fetch_url", "REST API reference"),
+      ]),
+    ).toBe("mcp");
+  });
+
+  it("limits GraphQL research to two successful actions", () => {
+    expect(
+      selectResearchFocus([
+        observation("authentication", "fetch_url", "OAuth 2.0"),
+        observation("access", "fetch_url", "Free developer account"),
+        observation("rest", "fetch_url", "REST API"),
+        observation("mcp", "fetch_url", "Official MCP server"),
+        observation("graphql", "search", "No official result found"),
+        observation("graphql", "fetch_url", "General developer documentation"),
+      ]),
+    ).toBeUndefined();
+  });
+
+  it("does not schedule direct buildability research", () => {
+    expect(selectResearchFocus([])).toBe("authentication");
+    expect(selectResearchFocus([])).not.toBe("buildability");
+  });
+});
 
 const result: AppResearchResult = {
   app: "Example",
