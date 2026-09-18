@@ -191,4 +191,15 @@ describe("applyFieldEvidence", () => {
 
     expect(mapped.evidence.flatMap((item) => item.supports)).not.toContain("mcp");
   });
+
+  it("accepts an official vendor page naming the product MCP service", () => {
+    const mcpResult = { ...result, mcp: { status: "available" as const } };
+    const mapped = applyFieldEvidence(
+      mcpResult,
+      ledger({ mcp: [restUrl] }),
+      [{ url: restUrl, content: "Connect to Example MCP using its hosted endpoint." }],
+    );
+
+    expect(mapped.evidence.flatMap((item) => item.supports)).toContain("mcp");
+  });
 });
