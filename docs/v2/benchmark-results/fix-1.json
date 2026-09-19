@@ -1,0 +1,404 @@
+﻿{
+    "capturedAt":  "2026-09-19T11:01:25.2129678Z",
+    "experiment":  "Fix 1: credential access and buildability",
+    "baseActionLimit":  10,
+    "decision":  "MODIFY",
+    "telemetryNote":  "Per-app CLI result files do not persist action telemetry.",
+    "apps":  [
+                 {
+                     "app":  "Stripe",
+                     "category":  "Finance and Fintech",
+                     "description":  "Stripe is a technology company that builds economic infrastructure for the internet, offering payment processing and financial services for online and mobile businesses.",
+                     "authMethods":  [
+                                         "API Key",
+                                         "Bearer Token",
+                                         "OAuth"
+                                     ],
+                     "accessModel":  "unknown",
+                     "apiSurface":  {
+                                        "rest":  null,
+                                        "graphql":  null,
+                                        "other":  [
+
+                                                  ],
+                                        "summary":  "API surface details remain unresolved because cited evidence did not support the generated claims."
+                                    },
+                     "mcp":  {
+                                 "status":  "available",
+                                 "notes":  "Stripe provides an official Model Context Protocol (MCP) server at mcp.stripe.com supporting tools for API interaction, documentation search, and account management."
+                             },
+                     "buildability":  "unknown",
+                     "blocker":  null,
+                     "confidence":  "medium",
+                     "unknownFields":  [
+                                           "accessModel",
+                                           "apiSurface.rest",
+                                           "apiSurface.graphql",
+                                           "buildability",
+                                           "category",
+                                           "description"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "title":  "authentication?lang=java",
+                                          "url":  "https://stripe.com/docs/api/authentication?lang=java",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "authMethods"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "Set up your account",
+                                          "url":  "https://docs.stripe.com/get-started/account/set-up",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "authMethods"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "Model Context Protocol (MCP)",
+                                          "url":  "https://docs.stripe.com/mcp",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "authMethods",
+                                                           "mcp"
+                                                       ]
+                                      }
+                                  ],
+                     "researchNotes":  [
+                                           "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+                                       ]
+                 },
+                 {
+                     "app":  "HubSpot",
+                     "category":  "CRM \u0026 Marketing Automation",
+                     "description":  "HubSpot is a comprehensive CRM, marketing, sales, and service platform that provides tools for customer relationship management, email marketing, content management, and customer support.",
+                     "authMethods":  [
+                                         "OAuth 2.0",
+                                         "Static Access Tokens (Private Apps)"
+                                     ],
+                     "accessModel":  "self_serve_free",
+                     "apiSurface":  {
+                                        "rest":  true,
+                                        "graphql":  true,
+                                        "other":  [
+
+                                                  ],
+                                        "summary":  "HubSpot provides an extensive date-versioned REST API (base URL https://api.hubapi.com/) for managing CRM objects, lists, properties, associations, and other platform features. It also provides a GraphQL API endpoint for querying CRM and HubDB data."
+                                    },
+                     "mcp":  {
+                                 "status":  "available",
+                                 "notes":  "HubSpot provides an official remote MCP server (mcp.hubspot.com) requiring OAuth 2.0/2.1 and user-level app scopes, as well as a local CLI-based Developer MCP server."
+                             },
+                     "buildability":  "buildable",
+                     "blocker":  null,
+                     "confidence":  "medium",
+                     "unknownFields":  [
+
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "title":  "Authentication overview",
+                                          "url":  "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/authentication/overview",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "authMethods"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "HubSpot Account Types",
+                                          "url":  "https://developers.hubspot.com/docs/getting-started/account-types",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "accessModel",
+                                                           "authMethods"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "Query HubSpot data using GraphQL",
+                                          "url":  "https://developers.hubspot.com/docs/cms/start-building/features/data-driven-content/graphql/query-hubspot-data-using-graphql",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "apiSurface.graphql",
+                                                           "apiSurface.rest"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "HubSpot MCP Server",
+                                          "url":  "https://developers.hubspot.com/ai-tools/mcp",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "mcp",
+                                                           "authMethods"
+                                                       ]
+                                      }
+                                  ],
+                     "researchNotes":  [
+                                           "HubSpot offers self-serve free standard accounts and free developer test accounts supporting OAuth 2.0 and Private App static tokens.",
+                                           "Both REST and GraphQL APIs are officially documented and available.",
+                                           "Official remote and local MCP servers are supported and documented.",
+                                           "Confidence was capped because the research budget was exhausted."
+                                       ]
+                 },
+                 {
+                     "app":  "Shopify",
+                     "category":  "E-commerce \u0026 Retail Platform",
+                     "description":  "Shopify is a complete e-commerce platform that lets anyone start, run, and grow a business, offering comprehensive APIs and MCP support for building agent-callable toolkits and commerce integrations.",
+                     "authMethods":  [
+                                         "OAuth (Token Exchange, Authorization Code Grant, Client Credentials Grant)"
+                                     ],
+                     "accessModel":  "unknown",
+                     "apiSurface":  {
+                                        "rest":  null,
+                                        "graphql":  true,
+                                        "other":  [
+
+                                                  ],
+                                        "summary":  "Cited evidence supports GraphQL; other API surface details remain unresolved."
+                                    },
+                     "mcp":  {
+                                 "status":  "unknown",
+                                 "notes":  "No cited evidence supports MCP status."
+                             },
+                     "buildability":  "unknown",
+                     "blocker":  null,
+                     "confidence":  "medium",
+                     "unknownFields":  [
+                                           "accessModel",
+                                           "apiSurface.rest",
+                                           "mcp",
+                                           "buildability",
+                                           "category",
+                                           "description"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "title":  "Access tokens",
+                                          "url":  "https://shopify.dev/docs/apps/build/authentication-authorization/access-tokens",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "authMethods",
+                                                           "apiSurface.graphql"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "GraphQL Admin API reference",
+                                          "url":  "https://shopify.dev/docs/api/admin-graphql/latest",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "apiSurface.graphql"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "About GraphQL",
+                                          "url":  "https://shopify.dev/docs/apps/build/graphql",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "apiSurface.graphql"
+                                                       ]
+                                      }
+                                  ],
+                     "researchNotes":  [
+                                           "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+                                       ]
+                 },
+                 {
+                     "app":  "NotebookLM Enterprise",
+                     "category":  "AI Research and Document Analysis",
+                     "description":  "An enterprise-grade AI research and brainstorming tool by Google Cloud that allows organizations to create notebooks, manage sources, and generate insights and audio overviews from documents.",
+                     "authMethods":  [
+                                         "Bearer Token",
+                                         "GCP OAuth2"
+                                     ],
+                     "accessModel":  "unknown",
+                     "apiSurface":  {
+                                        "rest":  null,
+                                        "graphql":  null,
+                                        "other":  [
+                                                      "Google Cloud Discovery Engine v1alpha RPC / gRPC API"
+                                                  ],
+                                        "summary":  "Cited evidence supports Google Cloud Discovery Engine v1alpha RPC / gRPC API; other API surface details remain unresolved."
+                                    },
+                     "mcp":  {
+                                 "status":  "unknown",
+                                 "notes":  "No cited evidence supports MCP status."
+                             },
+                     "buildability":  "unknown",
+                     "blocker":  "Requires a Google Cloud subscription, specific enterprise roles (Cloud NotebookLM Admin, Gemini Enterprise Admin, and Cloud NotebookLM User), and a minimum of 15 purchased licenses.",
+                     "confidence":  "medium",
+                     "unknownFields":  [
+                                           "accessModel",
+                                           "apiSurface.rest",
+                                           "apiSurface.graphql",
+                                           "mcp",
+                                           "buildability",
+                                           "category"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "title":  "Create and manage notebooks (API)  |  Gemini Notebook Enterprise  |  Google Cloud Documentation",
+                                          "url":  "https://docs.cloud.google.com/gemini/enterprise/notebooklm-enterprise/docs/api-notebooks",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "description",
+                                                           "apiSurface.other",
+                                                           "authMethods"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "Get licenses for Gemini Notebook Enterprise  |  Google Cloud Documentation",
+                                          "url":  "https://docs.cloud.google.com/gemini/enterprise/notebooklm-enterprise/docs/set-up-licensing",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "blocker"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "Package google.cloud.notebooklm.v1alpha  |  Agent Search  |  Google Cloud Documentation",
+                                          "url":  "https://docs.cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.notebooklm.v1alpha",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "apiSurface.other",
+                                                           "authMethods"
+                                                       ]
+                                      }
+                                  ],
+                     "researchNotes":  [
+                                           "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+                                       ]
+                 },
+                 {
+                     "app":  "LinkedIn Ads",
+                     "category":  "Advertising \u0026 Marketing",
+                     "description":  "LinkedIn Marketing Developer Platform provides APIs to create and manage LinkedIn advertising campaigns, report performance, synchronize leads, and manage company pages.",
+                     "authMethods":  [
+                                         "OAuth 2.0"
+                                     ],
+                     "accessModel":  "unknown",
+                     "apiSurface":  {
+                                        "rest":  null,
+                                        "graphql":  null,
+                                        "other":  [
+
+                                                  ],
+                                        "summary":  "API surface details remain unresolved because cited evidence did not support the generated claims."
+                                    },
+                     "mcp":  {
+                                 "status":  "unknown",
+                                 "notes":  "No cited evidence supports MCP status."
+                             },
+                     "buildability":  "unknown",
+                     "blocker":  "Requires creating a developer application and applying for specific API products under the Products tab, which entails vetting by LinkedIn.",
+                     "confidence":  "medium",
+                     "unknownFields":  [
+                                           "accessModel",
+                                           "apiSurface.rest",
+                                           "apiSurface.graphql",
+                                           "mcp",
+                                           "buildability"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "title":  "LinkedIn 3-Legged OAuth Flow - LinkedIn | Microsoft Learn",
+                                          "url":  "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "authMethods"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "Quick Start - LinkedIn | Microsoft Learn",
+                                          "url":  "https://learn.microsoft.com/en-us/linkedin/marketing/quick-start?view=li-lms-2026-06",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "blocker"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "LinkedIn Marketing Developer Platform - API Documentation",
+                                          "url":  "https://learn.microsoft.com/en-us/linkedin/marketing/integrations/marketing-integrations-overview?view=li-lms-2026-06",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "app",
+                                                           "category",
+                                                           "description",
+                                                           "authMethods"
+                                                       ]
+                                      }
+                                  ],
+                     "researchNotes":  [
+                                           "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+                                       ]
+                 },
+                 {
+                     "app":  "Slack",
+                     "category":  "Collaboration \u0026 Communication",
+                     "description":  "Slack is a channel-based messaging platform that brings people together, connects apps, and automates workflows to help teams work faster.",
+                     "authMethods":  [
+                                         "OAuth 2.0",
+                                         "Bearer Token"
+                                     ],
+                     "accessModel":  "self_serve_free",
+                     "apiSurface":  {
+                                        "rest":  null,
+                                        "graphql":  null,
+                                        "other":  [
+                                                      "Web API (HTTP RPC-style methods)"
+                                                  ],
+                                        "summary":  "Cited evidence supports Web API (HTTP RPC-style methods); other API surface details remain unresolved."
+                                    },
+                     "mcp":  {
+                                 "status":  "available",
+                                 "notes":  "Slack provides an official Model Context Protocol (MCP) server for cloud integration with AI assistants as well as a local server package (@modelcontextprotocol/server-slack)."
+                             },
+                     "buildability":  "buildable",
+                     "blocker":  null,
+                     "confidence":  "medium",
+                     "unknownFields":  [
+                                           "apiSurface.rest",
+                                           "apiSurface.graphql",
+                                           "category",
+                                           "description"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "title":  "Tokens",
+                                          "url":  "https://docs.slack.dev/authentication/tokens/",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "authMethods"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "Developer sandboxes",
+                                          "url":  "https://docs.slack.dev/tools/developer-sandboxes/",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "accessModel"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "Slack Web API",
+                                          "url":  "https://docs.slack.dev/apis/web-api",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "apiSurface.other",
+                                                           "authMethods"
+                                                       ]
+                                      },
+                                      {
+                                          "title":  "Guide to Model Context Protocol in Slack | Slack",
+                                          "url":  "https://slack.com/help/articles/48855576908307-Guide-to-Model-Context-Protocol-in-Slack",
+                                          "sourceType":  "official",
+                                          "supports":  [
+                                                           "mcp",
+                                                           "accessModel"
+                                                       ]
+                                      }
+                                  ],
+                     "researchNotes":  [
+                                           "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+                                       ]
+                 }
+             ]
+}
