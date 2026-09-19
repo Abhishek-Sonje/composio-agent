@@ -1,0 +1,438 @@
+{
+  "capturedAt": "2026-09-19T09:48:46.180Z",
+  "sourceCommit": "5aa5161dd963b21faba9183575e524c3cf4f9498",
+  "benchmark": [
+    "Stripe",
+    "HubSpot",
+    "Shopify",
+    "NotebookLM Enterprise",
+    "LinkedIn Ads",
+    "Slack"
+  ],
+  "constraints": {
+    "baseActionLimit": 10,
+    "pipeline": "submitted V1"
+  },
+  "apps": [
+    {
+      "result": {
+        "app": "Stripe",
+        "category": "Finance and Fintech",
+        "description": "Stripe is a technology company that builds economic infrastructure for the internet, offering payment processing and financial services for online and mobile businesses.",
+        "authMethods": [
+          "API Key",
+          "Bearer Token",
+          "OAuth"
+        ],
+        "accessModel": "unknown",
+        "apiSurface": {
+          "rest": null,
+          "graphql": null,
+          "other": [],
+          "summary": "API surface details remain unresolved because cited evidence did not support the generated claims."
+        },
+        "mcp": {
+          "status": "available",
+          "notes": "Stripe provides an official Model Context Protocol (MCP) server at mcp.stripe.com supporting tools for API interaction, documentation search, and account management."
+        },
+        "buildability": "unknown",
+        "blocker": null,
+        "confidence": "medium",
+        "unknownFields": [
+          "accessModel",
+          "apiSurface.rest",
+          "apiSurface.graphql",
+          "buildability",
+          "category",
+          "description"
+        ],
+        "evidence": [
+          {
+            "title": "authentication?lang=java",
+            "url": "https://stripe.com/docs/api/authentication?lang=java",
+            "sourceType": "official",
+            "supports": [
+              "authMethods"
+            ]
+          },
+          {
+            "title": "Set up your account",
+            "url": "https://docs.stripe.com/get-started/account/set-up",
+            "sourceType": "official",
+            "supports": [
+              "authMethods"
+            ]
+          },
+          {
+            "title": "Model Context Protocol (MCP)",
+            "url": "https://docs.stripe.com/mcp",
+            "sourceType": "official",
+            "supports": [
+              "authMethods",
+              "mcp"
+            ]
+          }
+        ],
+        "researchNotes": [
+          "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+        ]
+      },
+      "telemetry": {
+        "actionsUsed": 10,
+        "budgetExhausted": true,
+        "status": "completed"
+      }
+    },
+    {
+      "result": {
+        "app": "HubSpot",
+        "category": "CRM and Sales",
+        "description": "HubSpot is a comprehensive Customer Relationship Management (CRM) platform that provides tools for sales, marketing, customer service, and content management, enabling businesses to manage leads, track deals, and automate customer interactions.",
+        "authMethods": [
+          "OAuth",
+          "Bearer Token",
+          "Private App Access Token"
+        ],
+        "accessModel": "unknown",
+        "apiSurface": {
+          "rest": true,
+          "graphql": true,
+          "other": [],
+          "summary": "HubSpot provides a robust REST API for CRM objects, custom objects, schemas, and properties, alongside a dynamic GraphQL API and dedicated remote/local Model Context Protocol (MCP) servers."
+        },
+        "mcp": {
+          "status": "available",
+          "notes": "HubSpot offers an official remote MCP server (mcp.hubspot.com) for secure CRM interactions using OAuth 2.0 with PKCE, plus a local Developer MCP server for CLI-based tooling."
+        },
+        "buildability": "unknown",
+        "blocker": null,
+        "confidence": "medium",
+        "unknownFields": [
+          "accessModel",
+          "buildability",
+          "category",
+          "description"
+        ],
+        "evidence": [
+          {
+            "title": "Authentication overview",
+            "url": "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/authentication/overview",
+            "sourceType": "official",
+            "supports": [
+              "authMethods"
+            ]
+          },
+          {
+            "title": "Developer Platform Basics & Onboarding",
+            "url": "https://developers.hubspot.com/developer-platform-basics",
+            "sourceType": "official",
+            "supports": [
+              "authMethods"
+            ]
+          },
+          {
+            "title": "HubSpot MCP Server",
+            "url": "https://developers.hubspot.com/ai-tools/mcp",
+            "sourceType": "official",
+            "supports": [
+              "mcp",
+              "authMethods"
+            ]
+          },
+          {
+            "title": "Query HubSpot data using GraphQL",
+            "url": "https://developers.hubspot.com/docs/cms/start-building/features/data-driven-content/graphql/query-hubspot-data-using-graphql",
+            "sourceType": "official",
+            "supports": [
+              "apiSurface.graphql",
+              "apiSurface.rest"
+            ]
+          }
+        ],
+        "researchNotes": [
+          "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+        ]
+      },
+      "telemetry": {
+        "actionsUsed": 10,
+        "budgetExhausted": true,
+        "status": "completed"
+      }
+    },
+    {
+      "result": {
+        "app": "Shopify",
+        "category": "Ecommerce",
+        "description": "Shopify is a complete ecommerce platform that lets people start, run, and grow a business, providing a centralized admin to manage products, inventory, orders, and customers.",
+        "authMethods": [
+          "OAuth",
+          "Access Token (X-Shopify-Access-Token header)"
+        ],
+        "accessModel": "unknown",
+        "apiSurface": {
+          "rest": true,
+          "graphql": true,
+          "other": [],
+          "summary": "Shopify provides a comprehensive GraphQL Admin API and a legacy REST Admin API, both supporting standard ecommerce operations like managing products, orders, inventory, and customers."
+        },
+        "mcp": {
+          "status": "unknown",
+          "notes": "No cited evidence supports MCP status."
+        },
+        "buildability": "unknown",
+        "blocker": null,
+        "confidence": "medium",
+        "unknownFields": [
+          "accessModel",
+          "mcp",
+          "buildability",
+          "category",
+          "description"
+        ],
+        "evidence": [
+          {
+            "title": "Access tokens",
+            "url": "https://shopify.dev/docs/apps/build/authentication-authorization/access-tokens",
+            "sourceType": "official",
+            "supports": [
+              "authMethods",
+              "apiSurface.graphql"
+            ]
+          },
+          {
+            "title": "Scaffold an app",
+            "url": "https://shopify.dev/docs/apps/getting-started/create",
+            "sourceType": "official",
+            "supports": [
+              "authMethods",
+              "apiSurface.graphql"
+            ]
+          },
+          {
+            "title": "GraphQL Admin API reference",
+            "url": "https://shopify.dev/docs/api/admin-graphql/latest",
+            "sourceType": "official",
+            "supports": [
+              "apiSurface.graphql",
+              "authMethods",
+              "apiSurface.rest"
+            ]
+          },
+          {
+            "title": "REST Admin API reference",
+            "url": "https://shopify.dev/docs/api/admin-rest",
+            "sourceType": "official",
+            "supports": [
+              "apiSurface.rest",
+              "authMethods",
+              "apiSurface.graphql"
+            ]
+          }
+        ],
+        "researchNotes": [
+          "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+        ]
+      },
+      "telemetry": {
+        "actionsUsed": 10,
+        "budgetExhausted": true,
+        "status": "completed"
+      }
+    },
+    {
+      "result": {
+        "app": "NotebookLM Enterprise",
+        "category": "AI, Research and Media-native",
+        "description": "An enterprise-ready version of Gemini Notebook (NotebookLM) providing programmatic notebook management, document/source handling, and audio overview generation via Google Cloud APIs.",
+        "authMethods": [],
+        "accessModel": "enterprise_only",
+        "apiSurface": {
+          "rest": null,
+          "graphql": null,
+          "other": [
+            "gRPC RPC reference (`google.cloud.notebooklm.v1alpha`)"
+          ],
+          "summary": "Cited evidence supports gRPC RPC reference (`google.cloud.notebooklm.v1alpha`); other API surface details remain unresolved."
+        },
+        "mcp": {
+          "status": "unknown",
+          "notes": "No cited evidence supports MCP status."
+        },
+        "buildability": "unknown",
+        "blocker": null,
+        "confidence": "medium",
+        "unknownFields": [
+          "apiSurface.rest",
+          "apiSurface.graphql",
+          "mcp",
+          "buildability"
+        ],
+        "evidence": [
+          {
+            "title": "Package google.cloud.notebooklm.v1alpha | Agent Search | Google Cloud Documentation",
+            "url": "https://docs.cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.notebooklm.v1alpha",
+            "sourceType": "official",
+            "supports": [
+              "apiSurface.other"
+            ]
+          },
+          {
+            "title": "What is Gemini Notebook Enterprise? | Google Cloud Documentation",
+            "url": "https://docs.cloud.google.com/gemini/enterprise/notebooklm-enterprise/docs/overview",
+            "sourceType": "official",
+            "supports": [
+              "app",
+              "category",
+              "description",
+              "accessModel"
+            ]
+          }
+        ],
+        "researchNotes": [
+          "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+        ]
+      },
+      "telemetry": {
+        "actionsUsed": 10,
+        "budgetExhausted": true,
+        "status": "completed"
+      }
+    },
+    {
+      "result": {
+        "app": "LinkedIn Ads",
+        "category": "Marketing, Ads, Email and Social",
+        "description": "The LinkedIn Marketing Developer Platform provides a set of REST APIs including the Advertising API and Community Management API to manage ad accounts, campaigns, creatives, analytics, and organization pages.",
+        "authMethods": [
+          "OAuth 2.0 (3-legged authorization code flow)"
+        ],
+        "accessModel": "unknown",
+        "apiSurface": {
+          "rest": true,
+          "graphql": null,
+          "other": [],
+          "summary": "Cited evidence supports REST; other API surface details remain unresolved."
+        },
+        "mcp": {
+          "status": "unknown",
+          "notes": "No cited evidence supports MCP status."
+        },
+        "buildability": "partially_buildable",
+        "blocker": "LinkedIn Marketing APIs require application review, specific product approval (such as Developer vs. Standard tiers), and 3-legged OAuth member authentication, which introduces friction for autonomous agent-callable toolkits needing pre-existing user consent and account mappings.",
+        "confidence": "medium",
+        "unknownFields": [
+          "accessModel",
+          "apiSurface.graphql",
+          "mcp",
+          "category",
+          "description"
+        ],
+        "evidence": [
+          {
+            "title": "Marketing API FAQ - LinkedIn | Microsoft Learn",
+            "url": "https://learn.microsoft.com/en-us/linkedin/marketing/lms-faq?view=li-lms-2026-08",
+            "sourceType": "official",
+            "supports": [
+              "authMethods",
+              "buildability",
+              "blocker"
+            ]
+          },
+          {
+            "title": "Quick Start - LinkedIn | Microsoft Learn",
+            "url": "https://learn.microsoft.com/en-us/linkedin/marketing/quick-start?view=li-lms-2026-06",
+            "sourceType": "official",
+            "supports": [
+              "apiSurface.rest",
+              "buildability"
+            ]
+          }
+        ],
+        "researchNotes": [
+          "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+        ]
+      },
+      "telemetry": {
+        "actionsUsed": 10,
+        "budgetExhausted": true,
+        "status": "completed"
+      }
+    },
+    {
+      "result": {
+        "app": "Slack",
+        "category": "Communications and Messaging",
+        "description": "A channel-based messaging platform that brings people together, working together to get things done.",
+        "authMethods": [
+          "OAuth 2.0"
+        ],
+        "accessModel": "self_serve_free",
+        "apiSurface": {
+          "rest": null,
+          "graphql": null,
+          "other": [
+            "Events API",
+            "Socket Mode"
+          ],
+          "summary": "Cited evidence supports Events API, Socket Mode; other API surface details remain unresolved."
+        },
+        "mcp": {
+          "status": "available",
+          "notes": "Slack offers both an official cloud-hosted Slack MCP Server (allowing AI assistants to search channels, read threads, and perform actions) and the Slackbot MCP Client (allowing external third-party MCP servers to connect to Slack)."
+        },
+        "buildability": "buildable",
+        "blocker": null,
+        "confidence": "medium",
+        "unknownFields": [
+          "apiSurface.rest",
+          "apiSurface.graphql",
+          "category",
+          "description"
+        ],
+        "evidence": [
+          {
+            "title": "Tokens",
+            "url": "https://docs.slack.dev/authentication/tokens/",
+            "sourceType": "official",
+            "supports": [
+              "authMethods"
+            ]
+          },
+          {
+            "title": "Developer sandboxes",
+            "url": "https://docs.slack.dev/tools/developer-sandboxes.md",
+            "sourceType": "official",
+            "supports": [
+              "accessModel"
+            ]
+          },
+          {
+            "title": "Slack Web API",
+            "url": "https://docs.slack.dev/apis/web-api/",
+            "sourceType": "official",
+            "supports": [
+              "apiSurface.other",
+              "authMethods"
+            ]
+          },
+          {
+            "title": "MCP overview",
+            "url": "https://docs.slack.dev/ai/mcp-overview",
+            "sourceType": "official",
+            "supports": [
+              "mcp"
+            ]
+          }
+        ],
+        "researchNotes": [
+          "Unsupported claims were converted to unknown because no evidence item cited the affected fields."
+        ]
+      },
+      "telemetry": {
+        "actionsUsed": 10,
+        "budgetExhausted": true,
+        "status": "completed"
+      }
+    }
+  ]
+}
